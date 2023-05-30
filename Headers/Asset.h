@@ -1,22 +1,24 @@
+/*
+
 #ifndef ASSET_H
 #define ASSET_H
 
 #include <string>
-#include <vector>
 
 class Asset {
 private:
     std::string id;
-    std::vector<double> returns;
+    int startEndIndex[2];
 
 public:
-    Asset(const std::string& assetId, const std::vector<double>& assetReturns);
+    Asset(const std::string& assetId, int startIndex, int endIndex);
 
     void setId(const std::string& assetId);
-    void setReturns(const std::vector<double>& assetReturns);
+    void setStartEndIndex(int startIndex, int endIndex);
 
     std::string getId() const;
-    std::vector<double> getReturns() const;
+    const int* getStartEndIndex() const;
 };
 
 #endif // ASSET_H
+*/

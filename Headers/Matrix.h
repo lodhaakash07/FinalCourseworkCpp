@@ -21,8 +21,12 @@ public:
     Matrix operator*(const Matrix& other) const;
     Matrix crossProduct(const Matrix& other) const;
     double dotProduct(const Matrix& other) const;
-    std::vector<double> getColumn(int columnIndex) const;
-    // Other member functions...
+    const std::vector<double> getColumn(int columnIndex);
+    Matrix subset(int startIndex, int endIndex) const;
+    Matrix transpose();
+    Matrix operator*(const Matrix& other);
+    Matrix operator/(double scalar);
+    void transposeInPlace();
 };
 
 

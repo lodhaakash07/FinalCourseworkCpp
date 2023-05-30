@@ -1,25 +1,23 @@
 #ifndef PORTFOLIO_H
 #define PORTFOLIO_H
 
-#include "Asset.h"
 #include "Matrix.h"
 #include <vector>
 
 class Portfolio {
 private:
-    std::vector<Asset> assets;
-    std::vector<double> weights;
+    const Matrix& assetReturns;
+    int assetReturnsIndexes[2];
     std::vector<double> meanReturns;
     Matrix covarianceMatrix;
 
 public:
-    Portfolio();
+    Portfolio(const Matrix& assetReturns);
 
-    void addAsset(const Asset& asset);
-    void addWeight(double weight);
+    void addAssetReturnsIndex(int start, int end);
+    void calculateMeanReturns();
+    void calculateCovarianceMatrix();
 
-    std::vector<Asset> getAssets() const;
-    std::vector<double> getWeights() const;
     std::vector<double> getMeanReturns();
     Matrix getCovarianceMatrix();
 };
