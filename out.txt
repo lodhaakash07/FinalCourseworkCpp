@@ -1,0 +1,383 @@
+#ifndef CSVHANDLER_H
+#define CSVHANDLER_H
+
+#include "Matrix.h"
+#include "FileHandler.h"
+#include <vector>
+#include <string>
+
+class CSVHandler : public FileHandler {
+public:
+    Matrix readCSV(const std::string& filename);
+};
+
+#endif // CSVHANDLER_H
+#ifndef FILEHANDLER_H
+#define FILEHANDLER_H
+
+#include <vector>
+#include <string>
+
+class FileHandler {
+public:
+    std::vector<std::string> readFile(const std::string& filename);
+};
+
+#endif // FILEHANDLER_H
+#include "Headers/CSVHandler.h"
+#include <sstream>
+
+
+Matrix CSVHandler::readCSV(const std::string& filename) {
+    std::vector<std::string> lines = readFile(filename);
+    Matrix data;
+
+    for (const std::string& line : lines) {
+        std::vector<double> row;
+        std::stringstream ss(line);
+        std::string cell;
+
+        while (std::getline(ss, cell, ',')) {
+            row.push_back(std::stod(cell));
+        }
+
+        data.appendRow(row);
+    }
+    return data;
+}
+#include "Headers/FileHandler.h""
+#include <fstream>
+#include <iostream>
+
+std::vector<std::string> FileHandler::readFile(const std::string& filename) {
+    std::vector<std::string> lines;
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cout << "Failed to open the file: " << filename << std::endl;
+        return lines;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        lines.push_back(line);
+    }
+
+    file.close();
+    return lines;
+}
+#include <iostream>
+#include <vector>
+#include "Headers/Matrix.h"
+#include "Headers/CSVHandler.h"
+#include "Headers/Asset.h"
+#include "Headers/Window.h"
+#include <iostream>
+#include <vector>
+#include "Headers/Portfolio.h"
+
+int main() {
+    CSVHandler csvHandler;
+    Matrix assetReturns = csvHandler.readCSV("Data/asset_returns.csv");
+
+    // Check if matrix is empty
+    if (assetReturns.getData().empty()) {
+        std::cout << "Matrix is empty" << std::endl;
+        return 0;
+    }
+
+    // Create an object of Window
+    Window window(12, 100);
+
+    // Create an array of Portfolios
+    std::vector<Portfolio> portfolios;
+
+    // Loop over assetReturns to create rolling window portfolios
+    int numAssets = assetReturns.getData()[1].size();
+    std::cout << "Number of assets" << numAssets << std::endl;
+  
+    for (int currentIndex = 0; currentIndex + window.getOutSampleSize() <= assetReturns.getData().size(); currentIndex += window.getInSampleSize()) {
+        Portfolio portfolio;
+
+        for (int i = 0; i < numAssets; ++i) {
+            std::vector<double> outSampleReturns(assetReturns.getData()[currentIndex].begin(), assetReturns.getData()[currentIndex].begin() + window.getOutSampleSize());
+            Asset asset(std::to_string(i + 1), outSampleReturns);
+            portfolio.addAsset(asset);
+        }
+
+        portfolios.push_back(portfolio);
+    }
+
+
+    std::cout << "Success" << std::endl;
+
+    return 0;
+}#ifndef MATRIX_H
+#define MATRIX_H
+
+#include <vector>
+
+class Matrix {
+private:
+    std::vector<std::vector<double> > data;
+
+public:
+    Matrix();
+    Matrix(const std::vector<std::vector<double> >& inputData);
+    Matrix(int numRows, int numCols)
+    : data(numRows, std::vector<double>(numCols)) {}
+
+    void setData(const std::vector<std::vector<double> >& inputData);
+    void appendRow(const std::vector<double>& row);
+    std::vector<std::vector<double> > getData() const;
+
+    Matrix operator*(const Matrix& other) const;
+    Matrix crossProduct(const Matrix& other) const;
+    double dotProduct(const Matrix& other) const;
+    std::vector<double> getColumn(int columnIndex) const;
+    // Other member functions...
+};
+
+#endif // MATRIX_H
+#include "Headers/Matrix.h""
+#include <stdexcept>
+
+Matrix::Matrix() {}
+
+Matrix::Matrix(const std::vector<std::vector<double> >& inputData) : data(inputData) {}
+
+
+
+void Matrix::setData(const std::vector<std::vector<double> >& inputData) {
+    data = inputData;
+}
+
+void Matrix::appendRow(const std::vector<double>& row) {
+    if (!data.empty() && row.size() != data[0].size()) {
+        throw std::runtime_error("Cannot append row: Incompatible size");
+    }
+    data.push_back(row);
+}
+
+std::vector<std::vector<double> > Matrix::getData() const {
+    return data;
+}
+
+Matrix Matrix::operator*(const Matrix& other) const {
+    // Implementation of matrix multiplication
+}
+
+Matrix Matrix::crossProduct(const Matrix& other) const {
+    
+}
+
+double Matrix::dotProduct(const Matrix& other) const {
+    if (data.empty() || other.data.empty() || data.size() != other.data.size() ||
+        data[0].size() != other.data[0].size()) {
+        throw std::runtime_error("Invalid dot product operation: Matrices must have the same size");
+    }
+
+    double result = 0.0;
+    int rows = data.size();
+    int cols = data[0].size();
+
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            result += data[i][j] * other.data[i][j];
+        }
+    }
+
+    return result;
+}
+
+std::vector<double> Matrix::getColumn(int columnIndex) const {
+    std::vector<double> column;
+
+    if (!data.empty()) {
+        for (const auto& row : data) {
+            if (columnIndex < row.size()) {
+                column.push_back(row[columnIndex]);
+            }
+        }
+    }
+
+    return column;
+}#ifndef PORTFOLIO_H
+#define PORTFOLIO_H
+
+#include "Asset.h"
+#include "Matrix.h"
+#include <vector>
+
+class Portfolio {
+private:
+    std::vector<Asset> assets;
+    std::vector<double> weights;
+    std::vector<double> meanReturns;
+    Matrix covarianceMatrix;
+
+public:
+    Portfolio();
+
+    void addAsset(const Asset& asset);
+    void addWeight(double weight);
+
+    std::vector<Asset> getAssets() const;
+    std::vector<double> getWeights() const;
+    std::vector<double> getMeanReturns();
+    Matrix getCovarianceMatrix();
+};
+
+#endif // PORTFOLIO_H
+#ifndef WINDOW_H
+#define WINDOW_H
+
+class Window {
+private:
+    int inSampleSize;
+    int outSampleSize;
+
+public:
+    Window();
+    Window(int inSample, int outSample);
+
+    void setInSampleSize(int inSample);
+    void setOutSampleSize(int outSample);
+
+    int getInSampleSize() const;
+    int getOutSampleSize() const;
+};
+
+#endif // WINDOW_H
+#include "Headers/Portfolio.h"
+
+Portfolio::Portfolio() {}
+
+void Portfolio::addAsset(const Asset& asset) {
+    assets.push_back(asset);
+}
+
+void Portfolio::addWeight(double weight) {
+    weights.push_back(weight);
+}
+
+std::vector<Asset> Portfolio::getAssets() const {
+    return assets;
+}
+
+std::vector<double> Portfolio::getWeights() const {
+    return weights;
+}
+
+std::vector<double> Portfolio::getMeanReturns() {
+    if (meanReturns.empty()) {
+        // Calculate the mean returns
+        const std::vector<Asset>& assets = getAssets();
+        int numDays = assets[0].getReturns().size();
+        int numAssets = assets.size();
+
+        meanReturns.resize(numAssets);
+
+        for (int i = 0; i < numAssets; ++i) {
+            const std::vector<double>& returns = assets[i].getReturns();
+            double sum = 0.0;
+            for (int k = 0; k < numDays; ++k) {
+                sum += returns[k];
+            }
+            meanReturns[i] = sum / numDays;
+        }
+    }
+
+    return meanReturns;
+}
+
+Matrix Portfolio::getCovarianceMatrix() {
+    if (covarianceMatrix.getData().empty()) {
+        // Calculate the mean returns
+        std::vector<double> meanReturns = getMeanReturns();
+
+        // Calculate the covariance matrix
+        const std::vector<Asset>& assets = getAssets();
+        int numDays = assets[0].getReturns().size();
+        int numAssets = assets.size();
+
+        covarianceMatrix = Matrix(numAssets, numAssets);
+
+        for (int i = 0; i < numAssets; ++i) {
+            const std::vector<double>& returns1 = assets[i].getReturns();
+            for (int j = 0; j < numAssets; ++j) {
+                const std::vector<double>& returns2 = assets[j].getReturns();
+                double sum = 0.0;
+                for (int k = 0; k < numDays; ++k) {
+                    sum += (returns1[k] - meanReturns[i]) * (returns2[k] - meanReturns[j]);
+                }
+                covarianceMatrix.setData(i, j, sum / (numDays - 1));
+            }
+        }
+    }
+
+    return covarianceMatrix;
+}
+#include "Headers/Window.h"
+
+Window::Window() : inSampleSize(0), outSampleSize(0) {}
+
+Window::Window(int inSample, int outSample) : inSampleSize(inSample), outSampleSize(outSample) {}
+
+void Window::setInSampleSize(int inSample) {
+    inSampleSize = inSample;
+}
+
+void Window::setOutSampleSize(int outSample) {
+    outSampleSize = outSample;
+}
+
+int Window::getInSampleSize() const {
+    return inSampleSize;
+}
+
+int Window::getOutSampleSize() const {
+    return outSampleSize;
+}
+#ifndef ASSET_H
+#define ASSET_H
+
+#include <string>
+#include <vector>
+
+class Asset {
+private:
+    std::string id;
+    std::vector<double> returns;
+
+public:
+    Asset(const std::string& assetId, const std::vector<double>& assetReturns);
+
+    void setId(const std::string& assetId);
+    void setReturns(const std::vector<double>& assetReturns);
+
+    std::string getId() const;
+    std::vector<double> getReturns() const;
+};
+
+#endif // ASSET_H
+#include "Headers/Asset.h"
+
+Asset::Asset(const std::string& assetId, const std::vector<double>& assetReturns)
+    : id(assetId), returns(assetReturns) {}
+
+void Asset::setId(const std::string& assetId) {
+    id = assetId;
+}
+
+void Asset::setReturns(const std::vector<double>& assetReturns) {
+    returns = assetReturns;
+}
+
+std::string Asset::getId() const {
+    return id;
+}
+
+std::vector<double> Asset::getReturns() const {
+    return returns;
+}
