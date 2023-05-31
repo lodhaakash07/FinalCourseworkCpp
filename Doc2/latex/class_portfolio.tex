@@ -1,0 +1,124 @@
+\doxysection{Portfolio Class Reference}
+\hypertarget{class_portfolio}{}\label{class_portfolio}\index{Portfolio@{Portfolio}}
+
+
+Inheritance diagram for Portfolio\+:
+% FIG 0
+
+
+Collaboration diagram for Portfolio\+:
+% FIG 1
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_portfolio_a26cb2c24ab80022ad0b23556d071e530}{Portfolio}} (const \mbox{\hyperlink{class_matrix}{Matrix}} \&asset\+Returns)
+\item 
+void \mbox{\hyperlink{class_portfolio_a91e86cc1fcb8accecf5a8b7cdd7ae591}{populate\+Weights}} (double target\+Return)
+\item 
+void \mbox{\hyperlink{class_portfolio_a04f3be56b82d415a8527e7fac678b29a}{populate\+Statistics}} ()
+\item 
+double \mbox{\hyperlink{class_portfolio_ad3e3166cfb05dbec9617945d28a68313}{get\+Portfolio\+Mean}} () const
+\item 
+double \mbox{\hyperlink{class_portfolio_ae740fc339f0dc03fac93e3a8e4567ce1}{get\+Portfolio\+Covariance}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{class_assets}{Assets}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_assets_a3073f9960c565809a28820c99e8091a1}{Assets}} (const \mbox{\hyperlink{class_matrix}{Matrix}} \&asset\+Returns)
+\item 
+void \mbox{\hyperlink{class_assets_a790b87671d2f10fc30543de03685ad5f}{add\+Asset\+Returns\+Index}} (int start, int end)
+\item 
+void \mbox{\hyperlink{class_assets_a94a2a98d9b49ccbafb776b9907c19dc5}{populate\+Assets\+Mean\+Covariance}} ()
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_assets_a53204d7a40ea6c4f1aa1aa74fd6ad249}{get\+Mean\+Returns}} ()
+\item 
+\mbox{\hyperlink{class_matrix}{Matrix}} \mbox{\hyperlink{class_assets_a80d6fbd4e96ce80264f6cee21fc9cef3}{get\+Covariance\+Matrix}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{class_portfolio_parameter}{Portfolio\+Parameter}}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_portfolio_parameter_abb51bb1e26fb2439257983ffa3e00695}{generate\+Weights}} (\mbox{\hyperlink{class_assets}{Assets}} \&assets, double target\+Return)
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_portfolio_parameter_a275aed8c19a45ca4ea8c1b8539b0e40e}{get\+Weight}} ()
+\item 
+void \mbox{\hyperlink{class_portfolio_parameter_a372a9c9c23634ef44c8ff492ca465ecd}{set\+Weight}} (std\+::vector$<$ double $>$ w)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{class_conjugate_gradient_optimiser}{Conjugate\+Gradient\+Optimiser}}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_conjugate_gradient_optimiser_ae3ebe626375b37da2a8daf06eeb4b29a}{get\+Weights}} (const \mbox{\hyperlink{class_matrix}{Matrix}} \&cov\+Matrix, const std\+::vector$<$ double $>$ \&mean\+Returns, double target\+Return) override
+\end{DoxyCompactItemize}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_portfolio_optimiser_a95e7361697490dfa21bca0236e294465}\label{class_portfolio_optimiser_a95e7361697490dfa21bca0236e294465} 
+virtual std\+::vector$<$ double $>$ {\bfseries get\+Weights} (const \mbox{\hyperlink{class_matrix}{Matrix}} \&cov\+Matrix, const std\+::vector$<$ double $>$ \&mean\+Returns, double target\+Return)=0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{_portfolio_8h_source_l00008}{8}} of file \mbox{\hyperlink{_portfolio_8h_source}{Portfolio.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_portfolio_a26cb2c24ab80022ad0b23556d071e530}\label{class_portfolio_a26cb2c24ab80022ad0b23556d071e530} 
+\index{Portfolio@{Portfolio}!Portfolio@{Portfolio}}
+\index{Portfolio@{Portfolio}!Portfolio@{Portfolio}}
+\doxysubsubsection{\texorpdfstring{Portfolio()}{Portfolio()}}
+{\footnotesize\ttfamily Portfolio\+::\+Portfolio (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_matrix}{Matrix}} \&}]{asset\+Returns }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_portfolio_8cpp_source_l00004}{4}} of file \mbox{\hyperlink{_portfolio_8cpp_source}{Portfolio.\+cpp}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_portfolio_ae740fc339f0dc03fac93e3a8e4567ce1}\label{class_portfolio_ae740fc339f0dc03fac93e3a8e4567ce1} 
+\index{Portfolio@{Portfolio}!getPortfolioCovariance@{getPortfolioCovariance}}
+\index{getPortfolioCovariance@{getPortfolioCovariance}!Portfolio@{Portfolio}}
+\doxysubsubsection{\texorpdfstring{getPortfolioCovariance()}{getPortfolioCovariance()}}
+{\footnotesize\ttfamily double Portfolio\+::get\+Portfolio\+Covariance (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_portfolio_8cpp_source_l00052}{52}} of file \mbox{\hyperlink{_portfolio_8cpp_source}{Portfolio.\+cpp}}.
+
+\Hypertarget{class_portfolio_ad3e3166cfb05dbec9617945d28a68313}\label{class_portfolio_ad3e3166cfb05dbec9617945d28a68313} 
+\index{Portfolio@{Portfolio}!getPortfolioMean@{getPortfolioMean}}
+\index{getPortfolioMean@{getPortfolioMean}!Portfolio@{Portfolio}}
+\doxysubsubsection{\texorpdfstring{getPortfolioMean()}{getPortfolioMean()}}
+{\footnotesize\ttfamily double Portfolio\+::get\+Portfolio\+Mean (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_portfolio_8cpp_source_l00048}{48}} of file \mbox{\hyperlink{_portfolio_8cpp_source}{Portfolio.\+cpp}}.
+
+\Hypertarget{class_portfolio_a04f3be56b82d415a8527e7fac678b29a}\label{class_portfolio_a04f3be56b82d415a8527e7fac678b29a} 
+\index{Portfolio@{Portfolio}!populateStatistics@{populateStatistics}}
+\index{populateStatistics@{populateStatistics}!Portfolio@{Portfolio}}
+\doxysubsubsection{\texorpdfstring{populateStatistics()}{populateStatistics()}}
+{\footnotesize\ttfamily void Portfolio\+::populate\+Statistics (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_portfolio_8cpp_source_l00008}{8}} of file \mbox{\hyperlink{_portfolio_8cpp_source}{Portfolio.\+cpp}}.
+
+\Hypertarget{class_portfolio_a91e86cc1fcb8accecf5a8b7cdd7ae591}\label{class_portfolio_a91e86cc1fcb8accecf5a8b7cdd7ae591} 
+\index{Portfolio@{Portfolio}!populateWeights@{populateWeights}}
+\index{populateWeights@{populateWeights}!Portfolio@{Portfolio}}
+\doxysubsubsection{\texorpdfstring{populateWeights()}{populateWeights()}}
+{\footnotesize\ttfamily void Portfolio\+::populate\+Weights (\begin{DoxyParamCaption}\item[{double}]{target\+Return }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_portfolio_8cpp_source_l00013}{13}} of file \mbox{\hyperlink{_portfolio_8cpp_source}{Portfolio.\+cpp}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Headers/Portfolio.\+h\item 
+Portfolio.\+cpp\end{DoxyCompactItemize}

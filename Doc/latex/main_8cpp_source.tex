@@ -1,0 +1,78 @@
+\doxysection{main.\+cpp}
+\hypertarget{main_8cpp_source}{}\label{main_8cpp_source}\mbox{\hyperlink{main_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00002}00002\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#include\ "{}Headers/Matrix.h"{}}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#include\ "{}Headers/CSVHandler.h"{}}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00005}00005\ \textcolor{preprocessor}{\#include\ "{}Headers/Window.h"{}}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00006}00006\ \textcolor{preprocessor}{\#include\ "{}Headers/Assets.h"{}}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ "{}Headers/Portfolio.h"{}}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ "{}Headers/ConjugateGradientOptimiser.h"{}}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ "{}Headers/TargetReturns.h"{}}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00011}\mbox{\hyperlink{main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{00011}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}()\ \{}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00012}00012\ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00013}00013\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Read\ the\ file}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00014}00014\ \ \ \ \ \ \ \ \ CSVHandler\ csvHandler;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00015}00015\ \ \ \ \ \ \ \ \ Matrix\ assetReturns\ =\ csvHandler.readCSV(\textcolor{stringliteral}{"{}Data/asset\_returns.csv"{}});}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00017}00017\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Check\ if\ matrix\ is\ empty}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00018}00018\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (assetReturns.empty())\ \{}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Matrix\ is\ empty"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00020}00020\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00021}00021\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Create\ an\ object\ of\ Window}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00024}00024\ \ \ \ \ \ \ \ \ Window\ window(100,\ 12);}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00026}00026\ \ \ \ \ \ \ \ \ std::vector<std::vector<double>>\ data;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00027}00027\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Loop\ over\ assetReturns\ to\ create\ rolling\ window\ portfolios}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ numAssets\ =\ assetReturns.front().size();}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00029}00029\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Number\ of\ assets:\ "{}}\ <<\ numAssets\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ count\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00032}00032\ \ \ \ \ \ \ \ \ TargetReturns\ targetReturns;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ currentIndex\ =\ 0;\ currentIndex\ +\ window.getInSampleSize()\ <\ assetReturns.size();\ currentIndex\ +=\ window.getOutSampleSize())\ \{}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Processing\ in-\/sample\ rolling\ window:\ "{}}\ <<\ count++\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ Portfolio\ inSamplePortfolio(assetReturns);}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ Portfolio\ outSamplePortfolio(assetReturns);}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ inSamplePortfolio.addAssetReturnsIndex(currentIndex,\ currentIndex\ +\ window.getInSampleSize());}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ outSamplePortfolio.addAssetReturnsIndex(currentIndex\ +\ window.getInSampleSize(),\ currentIndex\ +\ window.getInSampleSize()\ +\ window.getOutSampleSize());}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Calculate\ mean\ returns\ and\ covariance\ matrix}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ inSamplePortfolio.populateAssetsMeanCovariance();}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ outSamplePortfolio.populateAssetsMeanCovariance();}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ targetReturn\ :\ targetReturns.getTargetReturns())\ \{}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ inSamplePortfolio.populateWeights(targetReturn);}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ inSamplePortfolio.populateStatistics();}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outSamplePortfolio.setWeight(inSamplePortfolio.getWeight());}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outSamplePortfolio.populateStatistics();}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}\ (window,\ targetReturn)\ =\ "{}}\ <<\ count\ <<\ \textcolor{stringliteral}{"{},\ "{}}\ <<\ targetReturn\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Insample\ (mean,\ covariance)\ =\ "{}}\ <<\ inSamplePortfolio.getPortfolioMean()\ <<\ \textcolor{stringliteral}{"{},\ "{}}\ <<\ inSamplePortfolio.getPortfolioCovariance()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Outsample\ (mean,\ covariance)\ =\ "{}}\ <<\ outSamplePortfolio.getPortfolioMean()\ <<\ \textcolor{stringliteral}{"{},\ "{}}\ <<\ outSamplePortfolio.getPortfolioCovariance()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<double>\ row;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row.push\_back(\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{double}\textcolor{keyword}{>}(count));}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row.push\_back(targetReturn);}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row.push\_back(inSamplePortfolio.getPortfolioMean());}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row.push\_back(inSamplePortfolio.getPortfolioCovariance());}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row.push\_back(outSamplePortfolio.getPortfolioMean());}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row.push\_back(outSamplePortfolio.getPortfolioCovariance());}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data.push\_back(row);}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ csvHandler.writeDataToCSV(data,\ \textcolor{stringliteral}{"{}portfolio\_data.csv"{}});}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00068}00068\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (\textcolor{keyword}{const}\ std::exception\&\ e)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}An\ error\ occurred:\ "{}}\ <<\ e.what()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00070}00070\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00072}00072\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{main_8cpp_source_l00073}00073\ \}}
+
+\end{DoxyCode}

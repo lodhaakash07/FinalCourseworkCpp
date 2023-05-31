@@ -1,0 +1,125 @@
+\doxysection{Matrix Class Reference}
+\hypertarget{class_matrix}{}\label{class_matrix}\index{Matrix@{Matrix}}
+
+
+Inheritance diagram for Matrix\+:
+% FIG 0
+
+
+Collaboration diagram for Matrix\+:
+% FIG 1
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_matrix_a079d9df29e435d99f633071f25404417}{append\+Row}} (const std\+::vector$<$ double $>$ \&row)
+\item 
+\mbox{\hyperlink{class_matrix}{Matrix}} \mbox{\hyperlink{class_matrix_a35cee47bb4a20bf850022054dc8f8889}{subset}} (int start\+Index, int end\+Index) const
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_matrix_a0f6f83554df3b748e2c87a64afc7fa8e}{subtract\+Vectors}} (const std\+::vector$<$ double $>$ \&a, const std\+::vector$<$ double $>$ \&b) const
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_matrix_a31b2c22e92d596a539e143113022082a}{multiply\+Matrix\+Vector}} (const \mbox{\hyperlink{class_matrix}{Matrix}} \&m, const std\+::vector$<$ double $>$ \&v) const
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_matrix_aa74df366f8da96d5f41c56e9f55bcccd}{multiply\+Vector}} (double scalar, const std\+::vector$<$ double $>$ \&v) const
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_matrix_ab204b2673440ad3d942de0a2372ad179}{add\+Vectors}} (const std\+::vector$<$ double $>$ \&a, const std\+::vector$<$ double $>$ \&b) const
+\item 
+double \mbox{\hyperlink{class_matrix_a83044933a1e73539874949c2104e609e}{dot\+Product}} (const std\+::vector$<$ double $>$ \&a, const std\+::vector$<$ double $>$ \&b) const
+\item 
+double \mbox{\hyperlink{class_matrix_a0275fd2b1388eb1cb425e2cf8342ef51}{norm}} (const std\+::vector$<$ double $>$ \&v) const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{_matrix_8h_source_l00006}{6}} of file \mbox{\hyperlink{_matrix_8h_source}{Matrix.\+h}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_matrix_ab204b2673440ad3d942de0a2372ad179}\label{class_matrix_ab204b2673440ad3d942de0a2372ad179} 
+\index{Matrix@{Matrix}!addVectors@{addVectors}}
+\index{addVectors@{addVectors}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{addVectors()}{addVectors()}}
+{\footnotesize\ttfamily std\+::vector$<$ double $>$ Matrix\+::add\+Vectors (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ double $>$ \&}]{a,  }\item[{const std\+::vector$<$ double $>$ \&}]{b }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00056}{56}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+\Hypertarget{class_matrix_a079d9df29e435d99f633071f25404417}\label{class_matrix_a079d9df29e435d99f633071f25404417} 
+\index{Matrix@{Matrix}!appendRow@{appendRow}}
+\index{appendRow@{appendRow}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{appendRow()}{appendRow()}}
+{\footnotesize\ttfamily void Matrix\+::append\+Row (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ double $>$ \&}]{row }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00004}{4}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+\Hypertarget{class_matrix_a83044933a1e73539874949c2104e609e}\label{class_matrix_a83044933a1e73539874949c2104e609e} 
+\index{Matrix@{Matrix}!dotProduct@{dotProduct}}
+\index{dotProduct@{dotProduct}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{dotProduct()}{dotProduct()}}
+{\footnotesize\ttfamily double Matrix\+::dot\+Product (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ double $>$ \&}]{a,  }\item[{const std\+::vector$<$ double $>$ \&}]{b }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00067}{67}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+\Hypertarget{class_matrix_a31b2c22e92d596a539e143113022082a}\label{class_matrix_a31b2c22e92d596a539e143113022082a} 
+\index{Matrix@{Matrix}!multiplyMatrixVector@{multiplyMatrixVector}}
+\index{multiplyMatrixVector@{multiplyMatrixVector}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{multiplyMatrixVector()}{multiplyMatrixVector()}}
+{\footnotesize\ttfamily std\+::vector$<$ double $>$ Matrix\+::multiply\+Matrix\+Vector (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_matrix}{Matrix}} \&}]{m,  }\item[{const std\+::vector$<$ double $>$ \&}]{v }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00035}{35}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+\Hypertarget{class_matrix_aa74df366f8da96d5f41c56e9f55bcccd}\label{class_matrix_aa74df366f8da96d5f41c56e9f55bcccd} 
+\index{Matrix@{Matrix}!multiplyVector@{multiplyVector}}
+\index{multiplyVector@{multiplyVector}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{multiplyVector()}{multiplyVector()}}
+{\footnotesize\ttfamily std\+::vector$<$ double $>$ Matrix\+::multiply\+Vector (\begin{DoxyParamCaption}\item[{double}]{scalar,  }\item[{const std\+::vector$<$ double $>$ \&}]{v }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00048}{48}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+\Hypertarget{class_matrix_a0275fd2b1388eb1cb425e2cf8342ef51}\label{class_matrix_a0275fd2b1388eb1cb425e2cf8342ef51} 
+\index{Matrix@{Matrix}!norm@{norm}}
+\index{norm@{norm}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{norm()}{norm()}}
+{\footnotesize\ttfamily double Matrix\+::norm (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ double $>$ \&}]{v }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00078}{78}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+\Hypertarget{class_matrix_a35cee47bb4a20bf850022054dc8f8889}\label{class_matrix_a35cee47bb4a20bf850022054dc8f8889} 
+\index{Matrix@{Matrix}!subset@{subset}}
+\index{subset@{subset}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{subset()}{subset()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix}{Matrix}} Matrix\+::subset (\begin{DoxyParamCaption}\item[{int}]{start\+Index,  }\item[{int}]{end\+Index }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00011}{11}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+\Hypertarget{class_matrix_a0f6f83554df3b748e2c87a64afc7fa8e}\label{class_matrix_a0f6f83554df3b748e2c87a64afc7fa8e} 
+\index{Matrix@{Matrix}!subtractVectors@{subtractVectors}}
+\index{subtractVectors@{subtractVectors}!Matrix@{Matrix}}
+\doxysubsubsection{\texorpdfstring{subtractVectors()}{subtractVectors()}}
+{\footnotesize\ttfamily std\+::vector$<$ double $>$ Matrix\+::subtract\+Vectors (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ double $>$ \&}]{a,  }\item[{const std\+::vector$<$ double $>$ \&}]{b }\end{DoxyParamCaption}) const}
+
+
+
+Definition at line \mbox{\hyperlink{_matrix_8cpp_source_l00024}{24}} of file \mbox{\hyperlink{_matrix_8cpp_source}{Matrix.\+cpp}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Headers/Matrix.\+h\item 
+Matrix.\+cpp\end{DoxyCompactItemize}

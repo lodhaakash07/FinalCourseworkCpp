@@ -53,7 +53,7 @@ void CSVHandler::writeDataToCSV(const std::vector<std::vector<double> >& data, c
 
         // Write the data
         for (const auto& row : data) {
-            for (size_t i = 0; i < row.size(); ++i) {
+            for (int i = 0; i < row.size(); ++i) {
                 file << row[i];
                 if (i != row.size() - 1) {
                     file << ", ";
@@ -97,64 +97,64 @@ std::vector<std::string> FileHandler::readFile(const std::string& filename) {
 #include "Headers/TargetReturns.h"
 
 int main() {
-    
-    // Read the file
-    CSVHandler csvHandler;
-    Matrix assetReturns = csvHandler.readCSV("Data/asset_returns.csv");
+    try {
+        // Read the file
+        CSVHandler csvHandler;
+        Matrix assetReturns = csvHandler.readCSV("Data/asset_returns.csv");
 
-    // Check if matrix is empty
-    if (assetReturns.empty()) {
-        std::cout << "Matrix is empty" << std::endl;
-        return 0;
-    }
+        // Check if matrix is empty
+        if (assetReturns.empty()) {
+            std::cout << "Matrix is empty" << std::endl;
+            return 0;
+        }
 
-    // Create an object of Window
-    Window window(100, 12);
+        // Create an object of Window
+        Window window(100, 12);
 
-    std::vector<std::vector<double> > data;
-    // Loop over assetReturns to create rolling window portfolios
-    int numAssets = assetReturns.front().size();
-    std::cout << "Number of assets: " << numAssets << std::endl;
+        std::vector<std::vector<double> > data;
+        // Loop over assetReturns to create rolling window portfolios
+        int numAssets = assetReturns.front().size();
+        std::cout << "Number of assets: " << numAssets << std::endl;
 
-    int count = 0;
-    TargetReturns targetReturns;
-    for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.size(); currentIndex += window.getOutSampleSize()) {
+        int count = 0;
+        TargetReturns targetReturns;
+        for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.size(); currentIndex += window.getOutSampleSize()) {
+            std::cout << "Processing in-sample rolling window: " << count++ << std::endl;
+            Portfolio inSamplePortfolio(assetReturns);
+            Portfolio outSamplePortfolio(assetReturns);
 
-        std::cout << "Processing in-sample rolling window: " << count++ << std::endl;
-        Portfolio inSamplePortfolio(assetReturns);
-        Portfolio outSamplePortfolio(assetReturns);
-        
-        inSamplePortfolio.addAssetReturnsIndex(currentIndex, currentIndex + window.getInSampleSize());
-        outSamplePortfolio.addAssetReturnsIndex(currentIndex + window.getInSampleSize(), currentIndex + window.getInSampleSize() + window.getOutSampleSize());
+            inSamplePortfolio.addAssetReturnsIndex(currentIndex, currentIndex + window.getInSampleSize());
+            outSamplePortfolio.addAssetReturnsIndex(currentIndex + window.getInSampleSize(), currentIndex + window.getInSampleSize() + window.getOutSampleSize());
 
-        // Calculate mean returns and covariance matrix
-        inSamplePortfolio.populateAssetsMeanCovariance();
-        outSamplePortfolio.populateAssetsMeanCovariance();
+            // Calculate mean returns and covariance matrix
+            inSamplePortfolio.populateAssetsMeanCovariance();
+            outSamplePortfolio.populateAssetsMeanCovariance();
 
-        for (const auto& targetReturn : targetReturns.getTargetReturns()) {
-             inSamplePortfolio.populateWeights(targetReturn);
-             inSamplePortfolio.populateStatistics();
-             outSamplePortfolio.setWeight(inSamplePortfolio.getWeight());
-             outSamplePortfolio.populateStatistics();
-             std::cout << " (window, targetReturn) = " << count << ", " << targetReturn << std::endl;
-             std::cout << "Insample (mean, covariance) = " << inSamplePortfolio.getPortfolioMean() << ", " << inSamplePortfolio.getPortfolioCovariance() << std::endl;
-             std::cout << "Outsample (mean, covariance) = " << outSamplePortfolio.getPortfolioMean() << ", " << outSamplePortfolio.getPortfolioCovariance() << std::endl;
-             std::cout << std::endl;
+            for (const auto& targetReturn : targetReturns.getTargetReturns()) {
+                inSamplePortfolio.populateWeights(targetReturn);
+                inSamplePortfolio.populateStatistics();
+                outSamplePortfolio.setWeight(inSamplePortfolio.getWeight());
+                outSamplePortfolio.populateStatistics();
+                std::cout << " (window, targetReturn) = " << count << ", " << targetReturn << std::endl;
+                std::cout << "Insample (mean, covariance) = " << inSamplePortfolio.getPortfolioMean() << ", " << inSamplePortfolio.getPortfolioCovariance() << std::endl;
+                std::cout << "Outsample (mean, covariance) = " << outSamplePortfolio.getPortfolioMean() << ", " << outSamplePortfolio.getPortfolioCovariance() << std::endl;
+                std::cout << std::endl;
 
-             std::vector<double> row;
-            row.push_back(static_cast<double>(count));
-            row.push_back(targetReturn);
-            row.push_back(inSamplePortfolio.getPortfolioMean());
-            row.push_back(inSamplePortfolio.getPortfolioCovariance());
-            row.push_back(outSamplePortfolio.getPortfolioMean());
-            row.push_back(outSamplePortfolio.getPortfolioCovariance());
+                std::vector<double> row;
+                row.push_back(static_cast<double>(count));
+                row.push_back(targetReturn);
+                row.push_back(inSamplePortfolio.getPortfolioMean());
+                row.push_back(inSamplePortfolio.getPortfolioCovariance());
+                row.push_back(outSamplePortfolio.getPortfolioMean());
+                row.push_back(outSamplePortfolio.getPortfolioCovariance());
 
-            data.push_back(row);
-
-
-        } 
-        std::cout << std::endl;
-        csvHandler.writeDataToCSV(data, "portfolio_data.csv");
+                data.push_back(row);
+            }
+            std::cout << std::endl;
+            csvHandler.writeDataToCSV(data, "portfolio_data.csv");
+        }
+    } catch (const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << std::endl;
     }
 
     return 0;
@@ -205,7 +205,7 @@ std::vector<double> Matrix::subtractVectors(const std::vector<double>& a, const 
         throw std::runtime_error("Cannot subtract vectors: Incompatible sizes");
     }
     std::vector<double> result(a.size());
-    for (size_t i = 0; i < a.size(); i++) {
+    for (int i = 0; i < a.size(); i++) {
         result[i] = a[i] - b[i];
     }
     return result;
@@ -216,8 +216,8 @@ std::vector<double> Matrix::multiplyMatrixVector(const Matrix& m, const std::vec
         throw std::runtime_error("Cannot multiply matrix and vector: Incompatible sizes");
     }
     std::vector<double> result(m.size(), 0.0);
-    for (size_t i = 0; i < m.size(); i++) {
-        for (size_t j = 0; j < m[i].size(); j++) {
+    for (int i = 0; i < m.size(); i++) {
+        for (int j = 0; j < m[i].size(); j++) {
             result[i] += m[i][j] * v[j];
         }
     }
@@ -226,7 +226,7 @@ std::vector<double> Matrix::multiplyMatrixVector(const Matrix& m, const std::vec
 
 std::vector<double> Matrix::multiplyVector(double scalar, const std::vector<double>& v) const {
     std::vector<double> result(v.size());
-    for (size_t i = 0; i < v.size(); i++) {
+    for (int i = 0; i < v.size(); i++) {
         result[i] = scalar * v[i];
     }
     return result;
@@ -237,7 +237,7 @@ std::vector<double> Matrix::addVectors(const std::vector<double>& a, const std::
         throw std::runtime_error("Cannot add vectors: Incompatible sizes");
     }
     std::vector<double> result(a.size());
-    for (size_t i = 0; i < a.size(); i++) {
+    for (int i = 0; i < a.size(); i++) {
         result[i] = a[i] + b[i];
     }
     return result;
@@ -248,7 +248,7 @@ double Matrix::dotProduct(const std::vector<double>& a, const std::vector<double
         throw std::runtime_error("Cannot compute dot product: Incompatible sizes");
     }
     double sum = 0.0;
-    for (size_t i = 0; i < a.size(); i++) {
+    for (int i = 0; i < a.size(); i++) {
         sum += a[i] * b[i];
     }
     return sum;
@@ -332,13 +332,13 @@ void Portfolio::calculatePortfolioCovariance() {
     const std::vector<double>& weights = getWeight();
     std::vector<double> weightsTranspose(weights.size());
     
-    for (size_t i = 0; i < weights.size(); ++i) {
+    for (int i = 0; i < weights.size(); ++i) {
         weightsTranspose[i] = weights[i];
     }
     
     double dotProduct = 0.0;
-    for (size_t i = 0; i < weights.size(); ++i) {
-        for (size_t j = 0; j < weights.size(); ++j) {
+    for (int i = 0; i < weights.size(); ++i) {
+        for (int j = 0; j < weights.size(); ++j) {
             dotProduct += weightsTranspose[i] * covMatrix[i][j] * weights[j];
         }
     }
@@ -405,13 +405,13 @@ public:
 
 std::vector<double> ConjugateGradientOptimiser::getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) {
     // Number of assets
-    size_t numAssets = covMatrix.size();
+    int numAssets = covMatrix.size();
 
     // Initialize weights vector with equal allocation
     std::vector<double> weights(numAssets, 1.0 / numAssets);
 
     // Conjugate Gradient iterations
-    size_t maxIterations = 1000;  // Maximum number of iterations
+    int maxIterations = 1000;  // Maximum number of iterations
     double tolerance = 1e-6;     // Tolerance for convergence
 
     std::vector<double> gradient(numAssets);    // Gradient vector
@@ -420,7 +420,7 @@ std::vector<double> ConjugateGradientOptimiser::getWeights(const Matrix& covMatr
 
     double alpha, beta, dotProduct, normGradient;
 
-    for (size_t iteration = 0; iteration < maxIterations; iteration++) {
+    for (int iteration = 0; iteration < maxIterations; iteration++) {
         // Calculate gradient
         gradient = covMatrix.multiplyMatrixVector(covMatrix, weights);
         gradient = covMatrix.multiplyVector(2.0, gradient);
@@ -614,19 +614,19 @@ public:
     TargetReturns();
 
     void addTargetReturn(double targetReturn);
-    void deleteTargetReturn(size_t index);
-    void setTargetReturn(size_t index, double targetReturn);
+    void deleteTargetReturn(int index);
+    void setTargetReturn(int index, double targetReturn);
 
     const std::vector<double>& getTargetReturns() const;
 };
 
-#endif // TARGETRETURNS_H
+#endif 
 #include <iostream>
 #include <vector>
 #include "Headers/TargetReturns.h"
 
 TargetReturns::TargetReturns() {
-    // Initialize with default targetReturns
+    // Initialize with default target returns
     targetReturns.push_back(0.0);
     targetReturns.push_back(0.005);
     targetReturns.push_back(0.01);
@@ -649,18 +649,17 @@ TargetReturns::TargetReturns() {
     targetReturns.push_back(0.095);
 }
 
-
 void TargetReturns::addTargetReturn(double targetReturn) {
     targetReturns.push_back(targetReturn);
 }
 
-void TargetReturns::deleteTargetReturn(size_t index) {
+void TargetReturns::deleteTargetReturn(int index) {
     if (index < targetReturns.size()) {
         targetReturns.erase(targetReturns.begin() + index);
     }
 }
 
-void TargetReturns::setTargetReturn(size_t index, double targetReturn) {
+void TargetReturns::setTargetReturn(int index, double targetReturn) {
     if (index < targetReturns.size()) {
         targetReturns[index] = targetReturn;
     }

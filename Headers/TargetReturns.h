@@ -11,10 +11,10 @@ public:
     TargetReturns();
 
     void addTargetReturn(double targetReturn);
-    void deleteTargetReturn(size_t index);
-    void setTargetReturn(size_t index, double targetReturn);
+    void deleteTargetReturn(int index);
+    void setTargetReturn(int index, double targetReturn);
 
     const std::vector<double>& getTargetReturns() const;
 };
 
-#endif // TARGETRETURNS_H
+#endif 

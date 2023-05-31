@@ -29,13 +29,13 @@ void Portfolio::calculatePortfolioCovariance() {
     const std::vector<double>& weights = getWeight();
     std::vector<double> weightsTranspose(weights.size());
     
-    for (size_t i = 0; i < weights.size(); ++i) {
+    for (int i = 0; i < weights.size(); ++i) {
         weightsTranspose[i] = weights[i];
     }
     
     double dotProduct = 0.0;
-    for (size_t i = 0; i < weights.size(); ++i) {
-        for (size_t j = 0; j < weights.size(); ++j) {
+    for (int i = 0; i < weights.size(); ++i) {
+        for (int j = 0; j < weights.size(); ++j) {
             dotProduct += weightsTranspose[i] * covMatrix[i][j] * weights[j];
         }
     }

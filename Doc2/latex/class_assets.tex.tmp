@@ -1,0 +1,88 @@
+\doxysection{Assets Class Reference}
+\hypertarget{class_assets}{}\label{class_assets}\index{Assets@{Assets}}
+
+
+Inheritance diagram for Assets\+:
+% FIG 0
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_assets_a3073f9960c565809a28820c99e8091a1}{Assets}} (const \mbox{\hyperlink{class_matrix}{Matrix}} \&asset\+Returns)
+\item 
+void \mbox{\hyperlink{class_assets_a790b87671d2f10fc30543de03685ad5f}{add\+Asset\+Returns\+Index}} (int start, int end)
+\item 
+void \mbox{\hyperlink{class_assets_a94a2a98d9b49ccbafb776b9907c19dc5}{populate\+Assets\+Mean\+Covariance}} ()
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{class_assets_a53204d7a40ea6c4f1aa1aa74fd6ad249}{get\+Mean\+Returns}} ()
+\item 
+\mbox{\hyperlink{class_matrix}{Matrix}} \mbox{\hyperlink{class_assets_a80d6fbd4e96ce80264f6cee21fc9cef3}{get\+Covariance\+Matrix}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{_assets_8h_source_l00007}{7}} of file \mbox{\hyperlink{_assets_8h_source}{Assets.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_assets_a3073f9960c565809a28820c99e8091a1}\label{class_assets_a3073f9960c565809a28820c99e8091a1} 
+\index{Assets@{Assets}!Assets@{Assets}}
+\index{Assets@{Assets}!Assets@{Assets}}
+\doxysubsubsection{\texorpdfstring{Assets()}{Assets()}}
+{\footnotesize\ttfamily Assets\+::\+Assets (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_matrix}{Matrix}} \&}]{asset\+Returns }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_assets_8cpp_source_l00005}{5}} of file \mbox{\hyperlink{_assets_8cpp_source}{Assets.\+cpp}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_a790b87671d2f10fc30543de03685ad5f}\label{class_assets_a790b87671d2f10fc30543de03685ad5f} 
+\index{Assets@{Assets}!addAssetReturnsIndex@{addAssetReturnsIndex}}
+\index{addAssetReturnsIndex@{addAssetReturnsIndex}!Assets@{Assets}}
+\doxysubsubsection{\texorpdfstring{addAssetReturnsIndex()}{addAssetReturnsIndex()}}
+{\footnotesize\ttfamily void Assets\+::add\+Asset\+Returns\+Index (\begin{DoxyParamCaption}\item[{int}]{start,  }\item[{int}]{end }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_assets_8cpp_source_l00008}{8}} of file \mbox{\hyperlink{_assets_8cpp_source}{Assets.\+cpp}}.
+
+\Hypertarget{class_assets_a80d6fbd4e96ce80264f6cee21fc9cef3}\label{class_assets_a80d6fbd4e96ce80264f6cee21fc9cef3} 
+\index{Assets@{Assets}!getCovarianceMatrix@{getCovarianceMatrix}}
+\index{getCovarianceMatrix@{getCovarianceMatrix}!Assets@{Assets}}
+\doxysubsubsection{\texorpdfstring{getCovarianceMatrix()}{getCovarianceMatrix()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix}{Matrix}} Assets\+::get\+Covariance\+Matrix (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_assets_8cpp_source_l00072}{72}} of file \mbox{\hyperlink{_assets_8cpp_source}{Assets.\+cpp}}.
+
+\Hypertarget{class_assets_a53204d7a40ea6c4f1aa1aa74fd6ad249}\label{class_assets_a53204d7a40ea6c4f1aa1aa74fd6ad249} 
+\index{Assets@{Assets}!getMeanReturns@{getMeanReturns}}
+\index{getMeanReturns@{getMeanReturns}!Assets@{Assets}}
+\doxysubsubsection{\texorpdfstring{getMeanReturns()}{getMeanReturns()}}
+{\footnotesize\ttfamily std\+::vector$<$ double $>$ Assets\+::get\+Mean\+Returns (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_assets_8cpp_source_l00063}{63}} of file \mbox{\hyperlink{_assets_8cpp_source}{Assets.\+cpp}}.
+
+\Hypertarget{class_assets_a94a2a98d9b49ccbafb776b9907c19dc5}\label{class_assets_a94a2a98d9b49ccbafb776b9907c19dc5} 
+\index{Assets@{Assets}!populateAssetsMeanCovariance@{populateAssetsMeanCovariance}}
+\index{populateAssetsMeanCovariance@{populateAssetsMeanCovariance}!Assets@{Assets}}
+\doxysubsubsection{\texorpdfstring{populateAssetsMeanCovariance()}{populateAssetsMeanCovariance()}}
+{\footnotesize\ttfamily void Assets\+::populate\+Assets\+Mean\+Covariance (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_assets_8cpp_source_l00014}{14}} of file \mbox{\hyperlink{_assets_8cpp_source}{Assets.\+cpp}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Headers/Assets.\+h\item 
+Assets.\+cpp\end{DoxyCompactItemize}

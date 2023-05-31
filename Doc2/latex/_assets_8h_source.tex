@@ -1,0 +1,32 @@
+\doxysection{Assets.\+h}
+\hypertarget{_assets_8h_source}{}\label{_assets_8h_source}\index{Headers/Assets.h@{Headers/Assets.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00001}00001\ \textcolor{preprocessor}{\#ifndef\ Assets\_H}}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00002}00002\ \textcolor{preprocessor}{\#define\ Assets\_H}}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00003}00003\ }
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00004}00004\ \textcolor{preprocessor}{\#include\ "{}Matrix.h"{}}}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00005}00005\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00007}\mbox{\hyperlink{class_assets}{00007}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_assets}{Assets}}\ \{}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00008}00008\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00009}00009\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_matrix}{Matrix}}\&\ assetReturns;}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00010}00010\ \ \ \ \ \textcolor{keywordtype}{int}\ assetReturnsIndexes[2];}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00011}00011\ \ \ \ \ std::vector<double>\ meanReturns;}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00012}00012\ \ \ \ \ \mbox{\hyperlink{class_matrix}{Matrix}}\ covarianceMatrix;}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00013}00013\ \ \ \ \ \textcolor{keywordtype}{void}\ calculateMeanReturns();}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00014}00014\ \ \ \ \ \textcolor{keywordtype}{void}\ calculateCovarianceMatrix();}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00016}00016\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00017}00017\ \ \ \ \ \mbox{\hyperlink{class_assets}{Assets}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_matrix}{Matrix}}\&\ assetReturns);}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00019}00019\ \ \ \ \ \textcolor{keywordtype}{void}\ addAssetReturnsIndex(\textcolor{keywordtype}{int}\ start,\ \textcolor{keywordtype}{int}\ end);}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00020}00020\ \ \ \ \ \textcolor{keywordtype}{void}\ populateAssetsMeanCovariance();}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00022}00022\ \ \ \ \ std::vector<double>\ getMeanReturns();}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00023}00023\ \ \ \ \ \mbox{\hyperlink{class_matrix}{Matrix}}\ getCovarianceMatrix();}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00024}00024\ \};}
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{_assets_8h_source_l00026}00026\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ Assets\_H}}
+
+\end{DoxyCode}

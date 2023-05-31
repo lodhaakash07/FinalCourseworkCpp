@@ -28,7 +28,7 @@ void CSVHandler::writeDataToCSV(const std::vector<std::vector<double> >& data, c
 
         // Write the data
         for (const auto& row : data) {
-            for (size_t i = 0; i < row.size(); ++i) {
+            for (int i = 0; i < row.size(); ++i) {
                 file << row[i];
                 if (i != row.size() - 1) {
                     file << ", ";

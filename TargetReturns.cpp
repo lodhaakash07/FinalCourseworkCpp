@@ -3,7 +3,7 @@
 #include "Headers/TargetReturns.h"
 
 TargetReturns::TargetReturns() {
-    // Initialize with default targetReturns
+    // Initialize with default target returns
     targetReturns.push_back(0.0);
     targetReturns.push_back(0.005);
     targetReturns.push_back(0.01);
@@ -26,18 +26,17 @@ TargetReturns::TargetReturns() {
     targetReturns.push_back(0.095);
 }
 
-
 void TargetReturns::addTargetReturn(double targetReturn) {
     targetReturns.push_back(targetReturn);
 }
 
-void TargetReturns::deleteTargetReturn(size_t index) {
+void TargetReturns::deleteTargetReturn(int index) {
     if (index < targetReturns.size()) {
         targetReturns.erase(targetReturns.begin() + index);
     }
 }
 
-void TargetReturns::setTargetReturn(size_t index, double targetReturn) {
+void TargetReturns::setTargetReturn(int index, double targetReturn) {
     if (index < targetReturns.size()) {
         targetReturns[index] = targetReturn;
     }
