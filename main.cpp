@@ -7,14 +7,14 @@
 #include <iostream>
 #include <vector>
 #include "Headers/Portfolio.h"
-int main() {
 
+int main() {
     // Read the file
     CSVHandler csvHandler;
     Matrix assetReturns = csvHandler.readCSV("Data/asset_returns.csv");
 
     // Check if matrix is empty
-    if (assetReturns.getData().empty()) {
+    if (assetReturns.empty()) {
         std::cout << "Matrix is empty" << std::endl;
         return 0;
     }
@@ -26,13 +26,13 @@ int main() {
     std::vector<Portfolio> portfolios;
 
     // Loop over assetReturns to create rolling window portfolios
-    int numAssets = assetReturns.getData()[1].size();
+    int numAssets = assetReturns.front().size();
     std::cout << "Number of assets: " << numAssets << std::endl;
 
     int count = 0;
-    for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.getData().size(); currentIndex += window.getOutSampleSize()) {
-        
-        std::cout << "Processing in sample rolling window : " << count++ << std::endl;
+    for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.size(); currentIndex += window.getOutSampleSize()) {
+
+        std::cout << "Processing in-sample rolling window: " << count++ << std::endl;
         Portfolio portfolio(assetReturns);
         portfolio.addAssetReturnsIndex(currentIndex, currentIndex + window.getInSampleSize());
 
@@ -41,7 +41,6 @@ int main() {
         portfolio.calculateCovarianceMatrix();
 
         portfolios.push_back(portfolio);
-       
     }
 
     std::cout << "Success" << std::endl;

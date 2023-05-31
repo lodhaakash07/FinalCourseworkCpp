@@ -11,8 +11,7 @@ public:
     Matrix readCSV(const std::string& filename);
 };
 
-#endif // CSVHANDLER_H
-#ifndef FILEHANDLER_H
+#endif // CSVHANDLER_H#ifndef FILEHANDLER_H
 #define FILEHANDLER_H
 
 #include <vector>
@@ -23,8 +22,7 @@ public:
     std::vector<std::string> readFile(const std::string& filename);
 };
 
-#endif // FILEHANDLER_H
-#include "Headers/CSVHandler.h"
+#endif // FILEHANDLER_H#include "Headers/CSVHandler.h"
 #include <sstream>
 
 
@@ -44,8 +42,7 @@ Matrix CSVHandler::readCSV(const std::string& filename) {
         data.appendRow(row);
     }
     return data;
-}
-#include "Headers/FileHandler.h""
+}#include "Headers/FileHandler.h""
 #include <fstream>
 #include <iostream>
 
@@ -65,8 +62,7 @@ std::vector<std::string> FileHandler::readFile(const std::string& filename) {
 
     file.close();
     return lines;
-}
-#include <iostream>
+}#include <iostream>
 #include <vector>
 #include "Headers/Matrix.h"
 #include "Headers/CSVHandler.h"
@@ -75,14 +71,14 @@ std::vector<std::string> FileHandler::readFile(const std::string& filename) {
 #include <iostream>
 #include <vector>
 #include "Headers/Portfolio.h"
-int main() {
 
+int main() {
     // Read the file
     CSVHandler csvHandler;
     Matrix assetReturns = csvHandler.readCSV("Data/asset_returns.csv");
 
     // Check if matrix is empty
-    if (assetReturns.getData().empty()) {
+    if (assetReturns.empty()) {
         std::cout << "Matrix is empty" << std::endl;
         return 0;
     }
@@ -94,13 +90,13 @@ int main() {
     std::vector<Portfolio> portfolios;
 
     // Loop over assetReturns to create rolling window portfolios
-    int numAssets = assetReturns.getData()[1].size();
+    int numAssets = assetReturns.front().size();
     std::cout << "Number of assets: " << numAssets << std::endl;
 
     int count = 0;
-    for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.getData().size(); currentIndex += window.getOutSampleSize()) {
-        
-        std::cout << "Processing in sample rolling window : " << count++ << std::endl;
+    for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.size(); currentIndex += window.getOutSampleSize()) {
+
+        std::cout << "Processing in-sample rolling window: " << count++ << std::endl;
         Portfolio portfolio(assetReturns);
         portfolio.addAssetReturnsIndex(currentIndex, currentIndex + window.getInSampleSize());
 
@@ -109,123 +105,60 @@ int main() {
         portfolio.calculateCovarianceMatrix();
 
         portfolios.push_back(portfolio);
-       
     }
 
     std::cout << "Success" << std::endl;
 
     return 0;
-}
-#ifndef MATRIX_H
+}#ifndef MATRIX_H
 #define MATRIX_H
 
 #include <vector>
 
-class Matrix {
-private:
-    std::vector<std::vector<double> > data;
-
+class Matrix : public std::vector<std::vector<double> > {
 public:
-    Matrix();
-    Matrix(const std::vector<std::vector<double> >& inputData);
-    Matrix(int numRows, int numCols)
-    : data(numRows, std::vector<double>(numCols)) {}
+    
 
-    void setData(const std::vector<std::vector<double> >& inputData);
-    void setData(int row, int col, double value);
     void appendRow(const std::vector<double>& row);
-    const Matrix& getData() const;
-
-    Matrix operator*(const Matrix& other) const;
-    Matrix crossProduct(const Matrix& other) const;
-    double dotProduct(const Matrix& other) const;
-    const std::vector<double> getColumn(int columnIndex);
     Matrix subset(int startIndex, int endIndex) const;
-    Matrix transpose();
-    Matrix operator*(const Matrix& other);
-    Matrix operator/(double scalar);
-    void transposeInPlace();
-    const int Matrix::size() const ;
+   // Matrix transpose() const;
+    Matrix operator*(const Matrix& other) const;
+    Matrix operator/(double scalar) const;
 };
 
-
-
-#endif // MATRIX_H
-#include "Headers/Matrix.h""
+#endif // MATRIX_H#include "Headers/Matrix.h""
 #include <stdexcept>
-
-Matrix::Matrix() {}
-
-Matrix::Matrix(const std::vector<std::vector<double> >& inputData) : data(inputData) {}
-
-
-
-void Matrix::setData(const std::vector<std::vector<double> >& inputData) {
-    data = inputData;
-}
 
 
 void Matrix::appendRow(const std::vector<double>& row) {
-    if (!data.empty() && row.size() != data[0].size()) {
+    if (!empty() && row.size() != front().size()) {
         throw std::runtime_error("Cannot append row: Incompatible size");
     }
-    data.push_back(row);
+    push_back(row);
 }
 
-
-const Matrix& Matrix::getData() const {
-    return data;
-}
-
-
-
-Matrix Matrix::operator*(const Matrix& other) {
-    // Check if the matrices are compatible for multiplication
-    if (data[0].size() != other.data.size()) {
-        throw std::runtime_error("Matrix multiplication error: Incompatible matrix dimensions");
+Matrix Matrix::subset(int startIndex, int endIndex) const {
+    if (startIndex < 0 || endIndex >= size() || startIndex > endIndex) {
+        throw std::runtime_error("Invalid indices for subsetting");
     }
 
-    int numRows = data.size();
-    int numCols = other.data[0].size();
-    int commonDim = data[0].size();
-
-    Matrix result(numRows, numCols);
-
-    for (int i = 0; i < numRows; ++i) {
-        for (int j = 0; j < numCols; ++j) {
-            double sum = 0.0;
-            for (int k = 0; k < commonDim; ++k) {
-                sum += data[i][k] * other.data[k][j];
-            }
-            result.setData(i, j, sum);
-        }
+    Matrix subsetData;
+    for (int i = startIndex; i < endIndex; ++i) {
+        subsetData.push_back((*this)[i]);
     }
 
-    return result;
+    return subsetData;
 }
-
-Matrix Matrix::operator/(double scalar)  {
-    Matrix result(data.size(), data[0].size());
-
-    for (size_t i = 0; i < data.size(); ++i) {
-        for (size_t j = 0; j < data[i].size(); ++j) {
-            result.setData(i, j, data[i][j] / scalar);
-        }
-    }
-
-    return result;
-}
-
-
-Matrix Matrix::transpose() {
-    int numRows = data.size();
-    int numCols = data[0].size();
+/*
+Matrix Matrix::transpose() const {
+    int numRows = size();
+    int numCols = front().size();
 
     Matrix result(numCols, numRows);
 
     for (int i = 0; i < numRows; ++i) {
         for (int j = 0; j < numCols; ++j) {
-            result.setData(j, i, data[i][j]);
+            result[j][i] = (*this)[i][j];
         }
     }
 
@@ -233,82 +166,43 @@ Matrix Matrix::transpose() {
 }
 
 
-Matrix Matrix::crossProduct(const Matrix& other) const {
-    
-}
 
-double Matrix::dotProduct(const Matrix& other) const {
-    if (data.empty() || other.data.empty() || data.size() != other.data.size() ||
-        data[0].size() != other.data[0].size()) {
-        throw std::runtime_error("Invalid dot product operation: Matrices must have the same size");
+Matrix Matrix::operator*(const Matrix& other) const {
+    // Check if the matrices are compatible for multiplication
+    if (front().size() != other.size()) {
+        throw std::runtime_error("Matrix multiplication error: Incompatible matrix dimensions");
     }
 
-    double result = 0.0;
-    int rows = data.size();
-    int cols = data[0].size();
+    int numRows = size();
+    int numCols = other.front().size();
+    int commonDim = front().size();
 
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            result += data[i][j] * other.data[i][j];
-        }
-    }
-
-    return result;
-}
-
-const std::vector<double> Matrix::getColumn(int columnIndex) {
-    std::vector<double> column;
-
-    if (!data.empty()) {
-        for (const auto& row : data) {
-            if (columnIndex < row.size()) {
-                column.push_back(row[columnIndex]);
-            }
-        }
-    }
-
-    return column;
-}
-
-void Matrix::setData(int row, int col, double value) {
-    if (row >= 0 && row < data.size() && col >= 0 && col < data[row].size()) {
-        data[row][col] = value;
-    } else {
-        throw std::runtime_error("Invalid matrix index");
-    }
-}
-
-Matrix Matrix::subset(int startIndex, int endIndex) const {
-    if (startIndex < 0 || endIndex >= data.size() || startIndex > endIndex) {
-        throw std::runtime_error("Invalid indices for subsetting");
-    }
-
-    std::vector<std::vector<double> > subsetData;
-    for (int i = startIndex; i < endIndex; ++i) {
-        subsetData.push_back(data[i]);
-    }
-    
-    return Matrix(subsetData);
-}
-
-void Matrix::transposeInPlace() {
-    int numRows = data.size();
-    int numCols = data[0].size();
-
-    std::vector<std::vector<double> > transposedData(numCols, std::vector<double>(numRows));
+    Matrix result(numRows, std::vector<double>(numCols));
 
     for (int i = 0; i < numRows; ++i) {
         for (int j = 0; j < numCols; ++j) {
-            transposedData[j][i] = data[i][j];
+            double sum = 0.0;
+            for (int k = 0; k < commonDim; ++k) {
+                sum += (*this)[i][k] * other[k][j];
+            }
+            result[i][j] = sum;
         }
     }
 
-    data = transposedData;
+    return result;
 }
 
-const int Matrix::size() const {
-    return data.size();
-}#ifndef PORTFOLIO_H
+Matrix Matrix::operator/(double scalar) const {
+    Matrix result(size(), std::vector<double>(front().size()));
+
+    for (size_t i = 0; i < size(); ++i) {
+        for (size_t j = 0; j < front().size(); ++j) {
+            result[i][j] = (*this)[i][j] / scalar;
+        }
+    }
+
+    return result;
+} */#ifndef PORTFOLIO_H
 #define PORTFOLIO_H
 
 #include "Matrix.h"
@@ -332,8 +226,7 @@ public:
     Matrix getCovarianceMatrix();
 };
 
-#endif // PORTFOLIO_H
-#ifndef WINDOW_H
+#endif // PORTFOLIO_H#ifndef WINDOW_H
 #define WINDOW_H
 
 class Window {
@@ -352,13 +245,12 @@ public:
     int getOutSampleSize() const;
 };
 
-#endif // WINDOW_H
-#include "Headers/Portfolio.h"
+#endif // WINDOW_H#include "Headers/Portfolio.h"
 #include "Headers/Matrix.h"
-#include<iostream>
+#include <iostream>
 
-Portfolio::Portfolio(const Matrix& assetReturns)
-    : assetReturns(assetReturns) {}
+Portfolio::Portfolio(const Matrix& assetReturns) : assetReturns(assetReturns) {}
+
 
 void Portfolio::addAssetReturnsIndex(int start, int end) {
     assetReturnsIndexes[0] = start;
@@ -366,65 +258,61 @@ void Portfolio::addAssetReturnsIndex(int start, int end) {
 }
 
 void Portfolio::calculateMeanReturns() {
-    Matrix portfolioAssets = assetReturns.subset(assetReturnsIndexes[0], assetReturnsIndexes[1]);
-   
-    portfolioAssets.transposeInPlace();
-    int numAssets = portfolioAssets.size();
-    std::cout << "Num Assets:" << numAssets << std::endl;
-    int numDays = portfolioAssets.getData()[0].size();
-     std::cout << "Num Days:" << numDays << std::endl;
+    const Matrix& assetData = assetReturns;
+
+    int numAssets = assetData.front().size();
+    int numDays = assetData.size();
 
     meanReturns.clear();
+    meanReturns.reserve(numAssets);
 
     for (int i = 0; i < numAssets; ++i) {
         double sum = 0.0;
-        for (int k = 0; k < numDays; ++k) {
-            sum += portfolioAssets.getData()[i][k];
+        for (int k = assetReturnsIndexes[0]; k < assetReturnsIndexes[1]; ++k) {
+            sum += assetData[k][i];
         }
-        double meanReturn = sum / numDays;
+        double meanReturn = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0]);
         meanReturns.push_back(meanReturn);
     }
 }
 
 void Portfolio::calculateCovarianceMatrix() {
-    Matrix portfolioAssets = assetReturns.subset(assetReturnsIndexes[0], assetReturnsIndexes[1]);
-    portfolioAssets.transposeInPlace();
-    int numAssets = portfolioAssets.getData().size();
-    int numDays = portfolioAssets.getData()[0].size();
+    const Matrix& assetData = assetReturns;
 
-    //calculateMeanReturns();
+    int numAssets = assetData[0].size();
+    int numDays = assetData.size();
 
-    covarianceMatrix = Matrix(numAssets, numAssets);
+    covarianceMatrix.clear();
+    covarianceMatrix.resize(numAssets, std::vector<double>(numAssets));
 
     for (int i = 0; i < numAssets; ++i) {
         for (int j = 0; j <= i; ++j) {
             double sum = 0.0;
-            for (int k = 0; k < numDays; ++k) {
-                double diff_i = portfolioAssets.getData()[i][k] - meanReturns[i];
-                double diff_j = portfolioAssets.getData()[j][k] - meanReturns[j];
+            for (int k = assetReturnsIndexes[0]; k < assetReturnsIndexes[1]; ++k) {
+                double diff_i = assetData[k][i] - meanReturns[i];
+                double diff_j = assetData[k][j] - meanReturns[j];
                 sum += diff_i * diff_j;
             }
-            double cov = sum / (numDays - 1);
-            covarianceMatrix.setData(i, j, cov);
-            covarianceMatrix.setData(j, i, cov); // Covariance matrix is symmetric
+            double cov = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0] - 1);
+            covarianceMatrix[i][j] = cov;
+            covarianceMatrix[j][i] = cov; // Covariance matrix is symmetric
         }
     }
-}
-
-std::vector<double> Portfolio::getMeanReturns() {
+}std::vector<double> Portfolio::getMeanReturns() {
     if (meanReturns.empty()) {
         calculateMeanReturns();
     }
-    return meanReturns;
+    return meanReturns
+    
+    ;
 }
 
 Matrix Portfolio::getCovarianceMatrix() {
-    if (covarianceMatrix.getData().empty()) {
+    if (covarianceMatrix.empty()) {
         calculateCovarianceMatrix();
     }
     return covarianceMatrix;
-}
-#include "Headers/Window.h"
+}#include "Headers/Window.h"
 
 Window::Window() : inSampleSize(0), outSampleSize(0) {}
 

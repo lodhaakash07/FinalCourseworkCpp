@@ -1,9 +1,9 @@
 #include "Headers/Portfolio.h"
 #include "Headers/Matrix.h"
-#include<iostream>
+#include <iostream>
 
-Portfolio::Portfolio(const Matrix& assetReturns)
-    : assetReturns(assetReturns) {}
+Portfolio::Portfolio(const Matrix& assetReturns) : assetReturns(assetReturns) {}
+
 
 void Portfolio::addAssetReturnsIndex(int start, int end) {
     assetReturnsIndexes[0] = start;
@@ -11,60 +11,57 @@ void Portfolio::addAssetReturnsIndex(int start, int end) {
 }
 
 void Portfolio::calculateMeanReturns() {
-    Matrix portfolioAssets = assetReturns.subset(assetReturnsIndexes[0], assetReturnsIndexes[1]);
-   
-    portfolioAssets.transposeInPlace();
-    int numAssets = portfolioAssets.getData().size();
-    std::cout << "Num Assets:" << numAssets << std::endl;
-    int numDays = portfolioAssets.getData()[0].size();
-     std::cout << "Num Days:" << numDays << std::endl;
+    const Matrix& assetData = assetReturns;
+
+    int numAssets = assetData.front().size();
+    int numDays = assetData.size();
 
     meanReturns.clear();
+    meanReturns.reserve(numAssets);
 
     for (int i = 0; i < numAssets; ++i) {
         double sum = 0.0;
-        for (int k = 0; k < numDays; ++k) {
-            sum += portfolioAssets.getData()[i][k];
+        for (int k = assetReturnsIndexes[0]; k < assetReturnsIndexes[1]; ++k) {
+            sum += assetData[k][i];
         }
-        double meanReturn = sum / numDays;
+        double meanReturn = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0]);
         meanReturns.push_back(meanReturn);
     }
 }
 
 void Portfolio::calculateCovarianceMatrix() {
-    Matrix portfolioAssets = assetReturns.subset(assetReturnsIndexes[0], assetReturnsIndexes[1]);
-    portfolioAssets.transposeInPlace();
-    int numAssets = portfolioAssets.getData().size();
-    int numDays = portfolioAssets.getData()[0].size();
+    const Matrix& assetData = assetReturns;
 
-    //calculateMeanReturns();
+    int numAssets = assetData[0].size();
+    int numDays = assetData.size();
 
-    covarianceMatrix = Matrix(numAssets, numAssets);
+    covarianceMatrix.clear();
+    covarianceMatrix.resize(numAssets, std::vector<double>(numAssets));
 
     for (int i = 0; i < numAssets; ++i) {
         for (int j = 0; j <= i; ++j) {
             double sum = 0.0;
-            for (int k = 0; k < numDays; ++k) {
-                double diff_i = portfolioAssets.getData()[i][k] - meanReturns[i];
-                double diff_j = portfolioAssets.getData()[j][k] - meanReturns[j];
+            for (int k = assetReturnsIndexes[0]; k < assetReturnsIndexes[1]; ++k) {
+                double diff_i = assetData[k][i] - meanReturns[i];
+                double diff_j = assetData[k][j] - meanReturns[j];
                 sum += diff_i * diff_j;
             }
-            double cov = sum / (numDays - 1);
-            covarianceMatrix.setData(i, j, cov);
-            covarianceMatrix.setData(j, i, cov); // Covariance matrix is symmetric
+            double cov = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0] - 1);
+            covarianceMatrix[i][j] = cov;
+            covarianceMatrix[j][i] = cov; // Covariance matrix is symmetric
         }
     }
-}
-
-std::vector<double> Portfolio::getMeanReturns() {
+}std::vector<double> Portfolio::getMeanReturns() {
     if (meanReturns.empty()) {
         calculateMeanReturns();
     }
-    return meanReturns;
+    return meanReturns
+    
+    ;
 }
 
 Matrix Portfolio::getCovarianceMatrix() {
-    if (covarianceMatrix.getData().empty()) {
+    if (covarianceMatrix.empty()) {
         calculateCovarianceMatrix();
     }
     return covarianceMatrix;
