@@ -24,7 +24,7 @@ void CSVHandler::writeDataToCSV(const std::vector<std::vector<double> >& data, c
     std::ofstream file(filename);
     if (file.is_open()) {
         // Write the column headers
-        file << "Window, Target Return, In-sample Mean, In-sample Covariance, Out-sample Mean, Out-sample Covariance\n";
+        file << "Window, TargetReturn, InSampleMean, InSampleCovariance, OutSampleMean, OutSampleCovariance\n";
 
         // Write the data
         for (const auto& row : data) {

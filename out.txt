@@ -1,4 +1,29 @@
-#ifndef CSVHANDLER_H
+#ifndef Assets_H
+#define Assets_H
+
+#include "Matrix.h"
+#include <vector>
+
+class Assets {
+private:
+    const Matrix& assetReturns;
+    int assetReturnsIndexes[2];
+    std::vector<double> meanReturns;
+    Matrix covarianceMatrix;
+    void calculateMeanReturns();
+    void calculateCovarianceMatrix();
+
+public:
+    Assets(const Matrix& assetReturns);
+
+    void addAssetReturnsIndex(int start, int end);
+    void populateAssetsMeanCovariance();
+
+    std::vector<double> getMeanReturns();
+    Matrix getCovarianceMatrix();
+};
+
+#endif // Assets_H#ifndef CSVHANDLER_H
 #define CSVHANDLER_H
 
 #include "Matrix.h"
@@ -49,7 +74,7 @@ void CSVHandler::writeDataToCSV(const std::vector<std::vector<double> >& data, c
     std::ofstream file(filename);
     if (file.is_open()) {
         // Write the column headers
-        file << "Window, Target Return, In-sample Mean, In-sample Covariance, Out-sample Mean, Out-sample Covariance\n";
+        file << "Window, TargetReturn, InSampleMean, InSampleCovariance, OutSampleMean, OutSampleCovariance\n";
 
         // Write the data
         for (const auto& row : data) {
@@ -455,32 +480,7 @@ std::vector<double> ConjugateGradientOptimiser::getWeights(const Matrix& covMatr
 
     return weights;
 }
-#ifndef Assets_H
-#define Assets_H
-
-#include "Matrix.h"
-#include <vector>
-
-class Assets {
-private:
-    const Matrix& assetReturns;
-    int assetReturnsIndexes[2];
-    std::vector<double> meanReturns;
-    Matrix covarianceMatrix;
-    void calculateMeanReturns();
-    void calculateCovarianceMatrix();
-
-public:
-    Assets(const Matrix& assetReturns);
-
-    void addAssetReturnsIndex(int start, int end);
-    void populateAssetsMeanCovariance();
-
-    std::vector<double> getMeanReturns();
-    Matrix getCovarianceMatrix();
-};
-
-#endif // Assets_H#include "Headers/Assets.h"
+#include "Headers/Assets.h"
 #include "Headers/Matrix.h"
 #include <iostream>
 

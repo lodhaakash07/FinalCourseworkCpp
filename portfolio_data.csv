@@ -1,4 +1,4 @@
-Window, Target Return, In-sample Mean, In-sample Covariance, Out-sample Mean, Out-sample Covariance
+Window, TargetReturn, InSampleMean, InSampleCovariance, OutSampleMean, OutSampleCovariance
 1, 0, 0.00493629, 0.00313023, 0.00236252, 0.000998416
 1, 0.005, 0.0148091, 0.00329203, 0.0147942, 0.00237337
 1, 0.01, 0.024633, 0.00348352, 0.0272016, 0.00478878
