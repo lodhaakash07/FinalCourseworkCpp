@@ -13,3 +13,7 @@ cat Window.cpp >> out.txt
 cat Headers/PortfolioOptimiser.h >> out.txt
 cat Headers/ConjugateGradientOptimiser.h >> out.txt
 cat ConjugateGradientOptimiser.cpp >> out.txt
+cat Headers/Assets.h >> out.txt
+cat Assets.cpp >> out.txt
+cat PortfolioParameter.cpp >> out.txt
+cat Headers/PortfolioParameter.h >> out.txt

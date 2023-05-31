@@ -1,76 +1,55 @@
 #include "Headers/ConjugateGradientOptimiser.h"
-#include <iostream>
+#include "Headers/Matrix.h"
 
 std::vector<double> ConjugateGradientOptimiser::getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) {
-    const double tolerance = 1e-6;
+    // Number of assets
+    size_t numAssets = covMatrix.size();
 
-    int numAssets = meanReturns.size();
-    Matrix Q;
+    // Initialize weights vector with equal allocation
+    std::vector<double> weights(numAssets, 1.0 / numAssets);
 
-    Q.resize(numAssets + 2, std::vector<double>(numAssets + 2, 0.0));
+    // Conjugate Gradient iterations
+    size_t maxIterations = 1000;  // Maximum number of iterations
+    double tolerance = 1e-6;     // Tolerance for convergence
 
-    // Copy covMatrix values to Q
-    for (int i = 0; i < numAssets; ++i) {
-        for (int j = 0; j < numAssets; ++j) {
-            Q[i][j] = covMatrix[i][j];
-        }
-    }
+    std::vector<double> gradient(numAssets);    // Gradient vector
+    std::vector<double> direction(numAssets);   // Conjugate direction vector
+    std::vector<double> prevDirection(numAssets);  // Previous conjugate direction vector
 
-    // Set the last two rows and columns of Q
-    for (int i = 0; i < numAssets; ++i) {
-        Q[i][numAssets] = Q[i][numAssets + 1] = meanReturns[i];
-        Q[numAssets][i] = Q[numAssets + 1][i] = meanReturns[i];
-    }
+    double alpha, beta, dotProduct, normGradient;
 
-    // Add a small positive value to the diagonal of Q
-    for (int i = 0; i < numAssets; ++i) {
-        Q[i][i] += 1e-6;
-    }
+    for (size_t iteration = 0; iteration < maxIterations; iteration++) {
+        // Calculate gradient
+        gradient = covMatrix.multiplyMatrixVector(covMatrix, weights);
+        gradient = covMatrix.multiplyVector(2.0, gradient);
+        std::vector<double> meanReturnsScaled = covMatrix.multiplyVector(2.0 * targetReturn, meanReturns);
+        gradient = covMatrix.subtractVectors(gradient, meanReturnsScaled);
 
-
-
-    std::vector<double> x(numAssets + 2, 0);
-    std::vector<double> b(numAssets + 2, 0);
-    b[numAssets] = -targetReturn;
-    b[numAssets + 1] = -1;
-
-    std::vector<double> s = Q.subtractVectors(b, Q.multiplyMatrixVector(Q, x));
-    std::vector<double> p = s;
-
-    for (size_t k = 0; Q.norm(s) > tolerance; k++) {
-        std::vector<double> Qp = Q.multiplyMatrixVector(Q, p);
-
-        double alpha = Q.dotProduct(s, s) / Q.dotProduct(p, Qp);
-
-        // Check if alpha is infinity or NaN
-        if (std::isinf(alpha) || std::isnan(alpha)) {
-            std::cout << "Error: alpha is infinity or NaN" << std::endl;
-            // Return default weights or handle the error condition as desired
-            return std::vector<double>(numAssets, 0.0);
+        // Check for convergence
+        normGradient = covMatrix.norm(gradient);
+        if (normGradient < tolerance) {
+            break;  // Convergence achieved
         }
 
-        std::vector<double> QpAlpha = Q.multiplyVector(alpha, Qp);
-        x = Q.addVectors(x, QpAlpha);
+        if (iteration == 0) {
+            direction = gradient;
+        } else {
+            dotProduct = covMatrix.dotProduct(gradient, gradient);
+            beta = dotProduct / normGradient;
 
-        s = Q.subtractVectors(s, QpAlpha);
-
-        if (Q.norm(s) <= tolerance) {
-            break;
+            direction = covMatrix.addVectors(gradient, covMatrix.multiplyVector(beta, prevDirection));
         }
 
-        double beta = Q.dotProduct(s, s) / Q.dotProduct(Qp, p);
+        // Calculate step size
+        dotProduct = covMatrix.dotProduct(gradient, direction);
+        alpha = normGradient / dotProduct;
 
-        // Check if beta is NaN
-        if (std::isnan(beta)) {
-            std::cout << "Error: beta is NaN" << std::endl;
-            // Return default weights or handle the error condition as desired
-            return std::vector<double>(numAssets, 0.0);
-        }
+        // Update weights
+        weights = covMatrix.subtractVectors(weights, covMatrix.multiplyVector(alpha, direction));
 
-        p = Q.addVectors(s, Q.multiplyVector(beta, p));
+        // Update previous direction
+        prevDirection = direction;
     }
-
-    std::vector<double> weights(x.begin(), x.begin() + numAssets);
 
     return weights;
 }
