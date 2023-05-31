@@ -9,6 +9,7 @@
 class CSVHandler : public FileHandler {
 public:
     Matrix readCSV(const std::string& filename);
+    void writeDataToCSV(const std::vector<std::vector<double> >& data, const std::string& filename);
 };
 
 #endif // CSVHANDLER_H

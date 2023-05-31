@@ -17,3 +17,5 @@ cat Headers/Assets.h >> out.txt
 cat Assets.cpp >> out.txt
 cat PortfolioParameter.cpp >> out.txt
 cat Headers/PortfolioParameter.h >> out.txt
+cat Headers/TargetReturns.h >> out.txt
+cat TargetReturns.cpp >> out.txt

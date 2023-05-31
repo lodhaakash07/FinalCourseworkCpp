@@ -14,6 +14,7 @@ public:
 
     std::vector<double> generateWeights(Assets& assets, double targetReturn);
     std::vector<double> getWeight();
+    void setWeight(std::vector<double> w);
 
 };
 

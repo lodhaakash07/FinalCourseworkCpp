@@ -19,3 +19,7 @@ std::vector<double> PortfolioParameter::generateWeights(Assets& assets, double t
 std::vector<double> PortfolioParameter::getWeight() {
     return weight;
 }
+
+void PortfolioParameter::setWeight(std::vector<double> w) {
+    weight = w;
+}
