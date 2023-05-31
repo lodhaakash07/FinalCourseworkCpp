@@ -66,11 +66,9 @@ std::vector<std::string> FileHandler::readFile(const std::string& filename) {
 #include <vector>
 #include "Headers/Matrix.h"
 #include "Headers/CSVHandler.h"
-
 #include "Headers/Window.h"
-#include <iostream>
-#include <vector>
 #include "Headers/Portfolio.h"
+#include "Headers/ConjugateGradientOptimiser.h"
 
 int main() {
     // Read the file
@@ -107,28 +105,43 @@ int main() {
         portfolios.push_back(portfolio);
     }
 
+    ConjugateGradientOptimiser optimiser;
+    double targetReturn = 0.01;  // Set a target return
+    for (Portfolio& portfolio : portfolios) {
+        std::vector<double> weights = optimiser.getWeights(portfolio.getCovarianceMatrix(), portfolio.getMeanReturns(), targetReturn);
+        
+        // Print weights for each portfolio
+        std::cout << "Portfolio weights: ";
+        for (double weight : weights) {
+            std::cout << weight << " ";
+        }
+        std::cout << std::endl;
+    }
+
     std::cout << "Success" << std::endl;
 
     return 0;
-}#ifndef MATRIX_H
+}
+#ifndef MATRIX_H
 #define MATRIX_H
 
 #include <vector>
 
 class Matrix : public std::vector<std::vector<double> > {
 public:
-    
-
     void appendRow(const std::vector<double>& row);
     Matrix subset(int startIndex, int endIndex) const;
-   // Matrix transpose() const;
-    Matrix operator*(const Matrix& other) const;
-    Matrix operator/(double scalar) const;
+    std::vector<double> subtractVectors(const std::vector<double>& a, const std::vector<double>& b) const;
+    std::vector<double> multiplyMatrixVector(const Matrix& m, const std::vector<double>& v) const;
+    std::vector<double> multiplyVector(double scalar, const std::vector<double>& v) const;
+    std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b) const;
+    double dotProduct(const std::vector<double>& a, const std::vector<double>& b) const;
+    double norm(const std::vector<double>& v) const;
 };
 
-#endif // MATRIX_H#include "Headers/Matrix.h""
+#endif // MATRIX_H
+#include "Headers/Matrix.h"
 #include <stdexcept>
-
 
 void Matrix::appendRow(const std::vector<double>& row) {
     if (!empty() && row.size() != front().size()) {
@@ -149,60 +162,65 @@ Matrix Matrix::subset(int startIndex, int endIndex) const {
 
     return subsetData;
 }
-/*
-Matrix Matrix::transpose() const {
-    int numRows = size();
-    int numCols = front().size();
 
-    Matrix result(numCols, numRows);
-
-    for (int i = 0; i < numRows; ++i) {
-        for (int j = 0; j < numCols; ++j) {
-            result[j][i] = (*this)[i][j];
-        }
+std::vector<double> Matrix::subtractVectors(const std::vector<double>& a, const std::vector<double>& b) const {
+    if (a.size() != b.size()) {
+        throw std::runtime_error("Cannot subtract vectors: Incompatible sizes");
     }
-
+    std::vector<double> result(a.size());
+    for (size_t i = 0; i < a.size(); i++) {
+        result[i] = a[i] - b[i];
+    }
     return result;
 }
 
-
-
-Matrix Matrix::operator*(const Matrix& other) const {
-    // Check if the matrices are compatible for multiplication
-    if (front().size() != other.size()) {
-        throw std::runtime_error("Matrix multiplication error: Incompatible matrix dimensions");
+std::vector<double> Matrix::multiplyMatrixVector(const Matrix& m, const std::vector<double>& v) const {
+    if (m.front().size() != v.size()) {
+        throw std::runtime_error("Cannot multiply matrix and vector: Incompatible sizes");
     }
-
-    int numRows = size();
-    int numCols = other.front().size();
-    int commonDim = front().size();
-
-    Matrix result(numRows, std::vector<double>(numCols));
-
-    for (int i = 0; i < numRows; ++i) {
-        for (int j = 0; j < numCols; ++j) {
-            double sum = 0.0;
-            for (int k = 0; k < commonDim; ++k) {
-                sum += (*this)[i][k] * other[k][j];
-            }
-            result[i][j] = sum;
+    std::vector<double> result(m.size(), 0.0);
+    for (size_t i = 0; i < m.size(); i++) {
+        for (size_t j = 0; j < m[i].size(); j++) {
+            result[i] += m[i][j] * v[j];
         }
     }
-
     return result;
 }
 
-Matrix Matrix::operator/(double scalar) const {
-    Matrix result(size(), std::vector<double>(front().size()));
-
-    for (size_t i = 0; i < size(); ++i) {
-        for (size_t j = 0; j < front().size(); ++j) {
-            result[i][j] = (*this)[i][j] / scalar;
-        }
+std::vector<double> Matrix::multiplyVector(double scalar, const std::vector<double>& v) const {
+    std::vector<double> result(v.size());
+    for (size_t i = 0; i < v.size(); i++) {
+        result[i] = scalar * v[i];
     }
-
     return result;
-} */#ifndef PORTFOLIO_H
+}
+
+std::vector<double> Matrix::addVectors(const std::vector<double>& a, const std::vector<double>& b) const {
+    if (a.size() != b.size()) {
+        throw std::runtime_error("Cannot add vectors: Incompatible sizes");
+    }
+    std::vector<double> result(a.size());
+    for (size_t i = 0; i < a.size(); i++) {
+        result[i] = a[i] + b[i];
+    }
+    return result;
+}
+
+double Matrix::dotProduct(const std::vector<double>& a, const std::vector<double>& b) const {
+    if (a.size() != b.size()) {
+        throw std::runtime_error("Cannot compute dot product: Incompatible sizes");
+    }
+    double sum = 0.0;
+    for (size_t i = 0; i < a.size(); i++) {
+        sum += a[i] * b[i];
+    }
+    return sum;
+}
+
+double Matrix::norm(const std::vector<double>& v) const {
+    return std::sqrt(dotProduct(v, v));
+}
+#ifndef PORTFOLIO_H
 #define PORTFOLIO_H
 
 #include "Matrix.h"
@@ -332,4 +350,62 @@ int Window::getInSampleSize() const {
 
 int Window::getOutSampleSize() const {
     return outSampleSize;
+}#ifndef PORTFOLIOOPTIMISER_H
+#define PORTFOLIOOPTIMISER_H
+
+#include "Matrix.h"
+#include <vector>
+
+class PortfolioOptimiser {
+public:
+    virtual std::vector<double> getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) = 0;
+};
+
+#endif // PORTFOLIOOPTIMISER_H
+#ifndef CONJUGATEGRADIENTOPTIMISER_H
+#define CONJUGATEGRADIENTOPTIMISER_H
+
+#include "PortfolioOptimiser.h"
+#include "Matrix.h"
+#include <vector>
+
+class ConjugateGradientOptimiser : public PortfolioOptimiser {
+public:
+    std::vector<double> getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) override;
+};
+
+#endif // CONJUGATEGRADIENTOPTIMISER_H
+#include "Headers/ConjugateGradientOptimiser.h"
+
+std::vector<double> ConjugateGradientOptimiser::getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) {
+    const double tolerance = 1e-6;  // set the tolerance ε to 10e-6
+
+    // Form the system of linear equations Qx = b from the optimization problem
+    Matrix Q = covMatrix;  // Initialize Q with the covariance matrix
+    Q.appendRow(meanReturns);  // Append the mean returns to Q
+    Q.appendRow(std::vector<double>(covMatrix.size(), 1));  // Append the constraint that the sum of weights equals 1
+
+    std::vector<double> x(covMatrix.size() + 2, 0);  // x is the vector of weights and Lagrange multipliers
+
+    std::vector<double> b(covMatrix.size(), targetReturn);  // Initialize b with the target return
+    b.push_back(0);  // Append zero for the constraint on the mean returns
+    b.push_back(1);  // Append one for the constraint that the sum of weights equals 1
+
+    // Step 0: Initialize s0, p0
+    std::vector<double> s = Q.subtractVectors(b, Q.multiplyMatrixVector(Q, x));  // s0 = b - Q * x0
+    std::vector<double> p = s;  // p0 = s0
+
+    // Step 1: Run the loop until the norm of sk is less than or equal to the tolerance
+    for (size_t k = 0; Q.norm(s) > tolerance; k++) {
+        double alpha = Q.dotProduct(s, s) / Q.dotProduct(p, Q.multiplyMatrixVector(Q, p));  // αk = s⊤k sk / p⊤k Qpk
+
+        x = Q.addVectors(x, Q.multiplyVector(alpha, p));  // xk+1 = xk + αk * pk
+        std::vector<double> old_s = s;
+        s = Q.subtractVectors(s, Q.multiplyVector(alpha, Q.multiplyMatrixVector(Q, p)));  // sk+1 = sk - αk * Qpk
+
+        double beta = Q.dotProduct(s, s) / Q.dotProduct(old_s, old_s);  // βk = s⊤k+1sk+1 / s⊤k sk
+        p = Q.addVectors(s, Q.multiplyVector(beta, p));  // pk+1 = sk+1 + βk * pk
+    }
+
+    return x;
 }

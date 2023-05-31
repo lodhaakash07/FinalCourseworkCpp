@@ -10,3 +10,6 @@ cat Headers/Portfolio.h >> out.txt
 cat Headers/Window.h >> out.txt
 cat Portfolio.cpp >> out.txt
 cat Window.cpp >> out.txt
+cat Headers/PortfolioOptimiser.h >> out.txt
+cat Headers/ConjugateGradientOptimiser.h >> out.txt
+cat ConjugateGradientOptimiser.cpp >> out.txt

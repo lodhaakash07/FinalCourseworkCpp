@@ -2,11 +2,9 @@
 #include <vector>
 #include "Headers/Matrix.h"
 #include "Headers/CSVHandler.h"
-
 #include "Headers/Window.h"
-#include <iostream>
-#include <vector>
 #include "Headers/Portfolio.h"
+#include "Headers/ConjugateGradientOptimiser.h"
 
 int main() {
     // Read the file
@@ -41,6 +39,19 @@ int main() {
         portfolio.calculateCovarianceMatrix();
 
         portfolios.push_back(portfolio);
+    }
+
+    ConjugateGradientOptimiser optimiser;
+    double targetReturn = 0.01;  // Set a target return
+    for (Portfolio& portfolio : portfolios) {
+        std::vector<double> weights = optimiser.getWeights(portfolio.getCovarianceMatrix(), portfolio.getMeanReturns(), targetReturn);
+        
+        // Print weights for each portfolio
+        std::cout << "Portfolio weights: ";
+        for (double weight : weights) {
+            std::cout << weight << " ";
+        }
+        std::cout << std::endl;
     }
 
     std::cout << "Success" << std::endl;

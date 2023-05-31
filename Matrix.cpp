@@ -1,6 +1,5 @@
-#include "Headers/Matrix.h""
+#include "Headers/Matrix.h"
 #include <stdexcept>
-
 
 void Matrix::appendRow(const std::vector<double>& row) {
     if (!empty() && row.size() != front().size()) {
@@ -21,57 +20,61 @@ Matrix Matrix::subset(int startIndex, int endIndex) const {
 
     return subsetData;
 }
-/*
-Matrix Matrix::transpose() const {
-    int numRows = size();
-    int numCols = front().size();
 
-    Matrix result(numCols, numRows);
-
-    for (int i = 0; i < numRows; ++i) {
-        for (int j = 0; j < numCols; ++j) {
-            result[j][i] = (*this)[i][j];
-        }
+std::vector<double> Matrix::subtractVectors(const std::vector<double>& a, const std::vector<double>& b) const {
+    if (a.size() != b.size()) {
+        throw std::runtime_error("Cannot subtract vectors: Incompatible sizes");
     }
-
+    std::vector<double> result(a.size());
+    for (size_t i = 0; i < a.size(); i++) {
+        result[i] = a[i] - b[i];
+    }
     return result;
 }
 
-
-
-Matrix Matrix::operator*(const Matrix& other) const {
-    // Check if the matrices are compatible for multiplication
-    if (front().size() != other.size()) {
-        throw std::runtime_error("Matrix multiplication error: Incompatible matrix dimensions");
+std::vector<double> Matrix::multiplyMatrixVector(const Matrix& m, const std::vector<double>& v) const {
+    if (m.front().size() != v.size()) {
+        throw std::runtime_error("Cannot multiply matrix and vector: Incompatible sizes");
     }
-
-    int numRows = size();
-    int numCols = other.front().size();
-    int commonDim = front().size();
-
-    Matrix result(numRows, std::vector<double>(numCols));
-
-    for (int i = 0; i < numRows; ++i) {
-        for (int j = 0; j < numCols; ++j) {
-            double sum = 0.0;
-            for (int k = 0; k < commonDim; ++k) {
-                sum += (*this)[i][k] * other[k][j];
-            }
-            result[i][j] = sum;
+    std::vector<double> result(m.size(), 0.0);
+    for (size_t i = 0; i < m.size(); i++) {
+        for (size_t j = 0; j < m[i].size(); j++) {
+            result[i] += m[i][j] * v[j];
         }
     }
-
     return result;
 }
 
-Matrix Matrix::operator/(double scalar) const {
-    Matrix result(size(), std::vector<double>(front().size()));
-
-    for (size_t i = 0; i < size(); ++i) {
-        for (size_t j = 0; j < front().size(); ++j) {
-            result[i][j] = (*this)[i][j] / scalar;
-        }
+std::vector<double> Matrix::multiplyVector(double scalar, const std::vector<double>& v) const {
+    std::vector<double> result(v.size());
+    for (size_t i = 0; i < v.size(); i++) {
+        result[i] = scalar * v[i];
     }
-
     return result;
-} */
+}
+
+std::vector<double> Matrix::addVectors(const std::vector<double>& a, const std::vector<double>& b) const {
+    if (a.size() != b.size()) {
+        throw std::runtime_error("Cannot add vectors: Incompatible sizes");
+    }
+    std::vector<double> result(a.size());
+    for (size_t i = 0; i < a.size(); i++) {
+        result[i] = a[i] + b[i];
+    }
+    return result;
+}
+
+double Matrix::dotProduct(const std::vector<double>& a, const std::vector<double>& b) const {
+    if (a.size() != b.size()) {
+        throw std::runtime_error("Cannot compute dot product: Incompatible sizes");
+    }
+    double sum = 0.0;
+    for (size_t i = 0; i < a.size(); i++) {
+        sum += a[i] * b[i];
+    }
+    return sum;
+}
+
+double Matrix::norm(const std::vector<double>& v) const {
+    return std::sqrt(dotProduct(v, v));
+}

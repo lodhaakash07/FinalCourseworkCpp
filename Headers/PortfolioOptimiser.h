@@ -6,7 +6,7 @@
 
 class PortfolioOptimiser {
 public:
-    virtual std::vector<double> getWeights(const Matrix& covarianceMatrix, const std::vector<double>& meanReturns, const std::vector<double>& targetReturns) = 0;
+    virtual std::vector<double> getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) = 0;
 };
 
 #endif // PORTFOLIOOPTIMISER_H
