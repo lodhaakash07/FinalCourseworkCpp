@@ -1,34 +1,76 @@
 #include "Headers/ConjugateGradientOptimiser.h"
+#include <iostream>
 
 std::vector<double> ConjugateGradientOptimiser::getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) {
-    const double tolerance = 1e-6;  // set the tolerance ε to 10e-6
+    const double tolerance = 1e-6;
 
-    // Form the system of linear equations Qx = b from the optimization problem
-    Matrix Q = covMatrix;  // Initialize Q with the covariance matrix
-    Q.appendRow(meanReturns);  // Append the mean returns to Q
-    Q.appendRow(std::vector<double>(covMatrix.size(), 1));  // Append the constraint that the sum of weights equals 1
+    int numAssets = meanReturns.size();
+    Matrix Q;
 
-    std::vector<double> x(covMatrix.size() + 2, 0);  // x is the vector of weights and Lagrange multipliers
+    Q.resize(numAssets + 2, std::vector<double>(numAssets + 2, 0.0));
 
-    std::vector<double> b(covMatrix.size(), targetReturn);  // Initialize b with the target return
-    b.push_back(0);  // Append zero for the constraint on the mean returns
-    b.push_back(1);  // Append one for the constraint that the sum of weights equals 1
-
-    // Step 0: Initialize s0, p0
-    std::vector<double> s = Q.subtractVectors(b, Q.multiplyMatrixVector(Q, x));  // s0 = b - Q * x0
-    std::vector<double> p = s;  // p0 = s0
-
-    // Step 1: Run the loop until the norm of sk is less than or equal to the tolerance
-    for (size_t k = 0; Q.norm(s) > tolerance; k++) {
-        double alpha = Q.dotProduct(s, s) / Q.dotProduct(p, Q.multiplyMatrixVector(Q, p));  // αk = s⊤k sk / p⊤k Qpk
-
-        x = Q.addVectors(x, Q.multiplyVector(alpha, p));  // xk+1 = xk + αk * pk
-        std::vector<double> old_s = s;
-        s = Q.subtractVectors(s, Q.multiplyVector(alpha, Q.multiplyMatrixVector(Q, p)));  // sk+1 = sk - αk * Qpk
-
-        double beta = Q.dotProduct(s, s) / Q.dotProduct(old_s, old_s);  // βk = s⊤k+1sk+1 / s⊤k sk
-        p = Q.addVectors(s, Q.multiplyVector(beta, p));  // pk+1 = sk+1 + βk * pk
+    // Copy covMatrix values to Q
+    for (int i = 0; i < numAssets; ++i) {
+        for (int j = 0; j < numAssets; ++j) {
+            Q[i][j] = covMatrix[i][j];
+        }
     }
 
-    return x;
+    // Set the last two rows and columns of Q
+    for (int i = 0; i < numAssets; ++i) {
+        Q[i][numAssets] = Q[i][numAssets + 1] = meanReturns[i];
+        Q[numAssets][i] = Q[numAssets + 1][i] = meanReturns[i];
+    }
+
+    // Add a small positive value to the diagonal of Q
+    for (int i = 0; i < numAssets; ++i) {
+        Q[i][i] += 1e-6;
+    }
+
+
+
+    std::vector<double> x(numAssets + 2, 0);
+    std::vector<double> b(numAssets + 2, 0);
+    b[numAssets] = -targetReturn;
+    b[numAssets + 1] = -1;
+
+    std::vector<double> s = Q.subtractVectors(b, Q.multiplyMatrixVector(Q, x));
+    std::vector<double> p = s;
+
+    for (size_t k = 0; Q.norm(s) > tolerance; k++) {
+        std::vector<double> Qp = Q.multiplyMatrixVector(Q, p);
+
+        double alpha = Q.dotProduct(s, s) / Q.dotProduct(p, Qp);
+
+        // Check if alpha is infinity or NaN
+        if (std::isinf(alpha) || std::isnan(alpha)) {
+            std::cout << "Error: alpha is infinity or NaN" << std::endl;
+            // Return default weights or handle the error condition as desired
+            return std::vector<double>(numAssets, 0.0);
+        }
+
+        std::vector<double> QpAlpha = Q.multiplyVector(alpha, Qp);
+        x = Q.addVectors(x, QpAlpha);
+
+        s = Q.subtractVectors(s, QpAlpha);
+
+        if (Q.norm(s) <= tolerance) {
+            break;
+        }
+
+        double beta = Q.dotProduct(s, s) / Q.dotProduct(Qp, p);
+
+        // Check if beta is NaN
+        if (std::isnan(beta)) {
+            std::cout << "Error: beta is NaN" << std::endl;
+            // Return default weights or handle the error condition as desired
+            return std::vector<double>(numAssets, 0.0);
+        }
+
+        p = Q.addVectors(s, Q.multiplyVector(beta, p));
+    }
+
+    std::vector<double> weights(x.begin(), x.begin() + numAssets);
+
+    return weights;
 }

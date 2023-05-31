@@ -1,411 +1,152 @@
-#ifndef CSVHANDLER_H
-#define CSVHANDLER_H
-
-#include "Matrix.h"
-#include "FileHandler.h"
-#include <vector>
-#include <string>
-
-class CSVHandler : public FileHandler {
-public:
-    Matrix readCSV(const std::string& filename);
-};
-
-#endif // CSVHANDLER_H#ifndef FILEHANDLER_H
-#define FILEHANDLER_H
-
-#include <vector>
-#include <string>
-
-class FileHandler {
-public:
-    std::vector<std::string> readFile(const std::string& filename);
-};
-
-#endif // FILEHANDLER_H#include "Headers/CSVHandler.h"
-#include <sstream>
-
-
-Matrix CSVHandler::readCSV(const std::string& filename) {
-    std::vector<std::string> lines = readFile(filename);
-    Matrix data;
-
-    for (const std::string& line : lines) {
-        std::vector<double> row;
-        std::stringstream ss(line);
-        std::string cell;
-
-        while (std::getline(ss, cell, ',')) {
-            row.push_back(std::stod(cell));
-        }
-
-        data.appendRow(row);
-    }
-    return data;
-}#include "Headers/FileHandler.h""
-#include <fstream>
-#include <iostream>
-
-std::vector<std::string> FileHandler::readFile(const std::string& filename) {
-    std::vector<std::string> lines;
-    std::ifstream file(filename);
-
-    if (!file.is_open()) {
-        std::cout << "Failed to open the file: " << filename << std::endl;
-        return lines;
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        lines.push_back(line);
-    }
-
-    file.close();
-    return lines;
-}#include <iostream>
-#include <vector>
-#include "Headers/Matrix.h"
-#include "Headers/CSVHandler.h"
-#include "Headers/Window.h"
-#include "Headers/Portfolio.h"
-#include "Headers/ConjugateGradientOptimiser.h"
-
-int main() {
-    // Read the file
-    CSVHandler csvHandler;
-    Matrix assetReturns = csvHandler.readCSV("Data/asset_returns.csv");
-
-    // Check if matrix is empty
-    if (assetReturns.empty()) {
-        std::cout << "Matrix is empty" << std::endl;
-        return 0;
-    }
-
-    // Create an object of Window
-    Window window(100, 10);
-
-    // Create an array of Portfolios
-    std::vector<Portfolio> portfolios;
-
-    // Loop over assetReturns to create rolling window portfolios
-    int numAssets = assetReturns.front().size();
-    std::cout << "Number of assets: " << numAssets << std::endl;
-
-    int count = 0;
-    for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.size(); currentIndex += window.getOutSampleSize()) {
-
-        std::cout << "Processing in-sample rolling window: " << count++ << std::endl;
-        Portfolio portfolio(assetReturns);
-        portfolio.addAssetReturnsIndex(currentIndex, currentIndex + window.getInSampleSize());
-
-        // Calculate mean returns and covariance matrix
-        portfolio.calculateMeanReturns();
-        portfolio.calculateCovarianceMatrix();
-
-        portfolios.push_back(portfolio);
-    }
-
-    ConjugateGradientOptimiser optimiser;
-    double targetReturn = 0.01;  // Set a target return
-    for (Portfolio& portfolio : portfolios) {
-        std::vector<double> weights = optimiser.getWeights(portfolio.getCovarianceMatrix(), portfolio.getMeanReturns(), targetReturn);
-        
-        // Print weights for each portfolio
-        std::cout << "Portfolio weights: ";
-        for (double weight : weights) {
-            std::cout << weight << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    std::cout << "Success" << std::endl;
-
-    return 0;
-}
-#ifndef MATRIX_H
-#define MATRIX_H
-
-#include <vector>
-
-class Matrix : public std::vector<std::vector<double> > {
-public:
-    void appendRow(const std::vector<double>& row);
-    Matrix subset(int startIndex, int endIndex) const;
-    std::vector<double> subtractVectors(const std::vector<double>& a, const std::vector<double>& b) const;
-    std::vector<double> multiplyMatrixVector(const Matrix& m, const std::vector<double>& v) const;
-    std::vector<double> multiplyVector(double scalar, const std::vector<double>& v) const;
-    std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b) const;
-    double dotProduct(const std::vector<double>& a, const std::vector<double>& b) const;
-    double norm(const std::vector<double>& v) const;
-};
-
-#endif // MATRIX_H
-#include "Headers/Matrix.h"
-#include <stdexcept>
-
-void Matrix::appendRow(const std::vector<double>& row) {
-    if (!empty() && row.size() != front().size()) {
-        throw std::runtime_error("Cannot append row: Incompatible size");
-    }
-    push_back(row);
-}
-
-Matrix Matrix::subset(int startIndex, int endIndex) const {
-    if (startIndex < 0 || endIndex >= size() || startIndex > endIndex) {
-        throw std::runtime_error("Invalid indices for subsetting");
-    }
-
-    Matrix subsetData;
-    for (int i = startIndex; i < endIndex; ++i) {
-        subsetData.push_back((*this)[i]);
-    }
-
-    return subsetData;
-}
-
-std::vector<double> Matrix::subtractVectors(const std::vector<double>& a, const std::vector<double>& b) const {
-    if (a.size() != b.size()) {
-        throw std::runtime_error("Cannot subtract vectors: Incompatible sizes");
-    }
-    std::vector<double> result(a.size());
-    for (size_t i = 0; i < a.size(); i++) {
-        result[i] = a[i] - b[i];
-    }
-    return result;
-}
-
-std::vector<double> Matrix::multiplyMatrixVector(const Matrix& m, const std::vector<double>& v) const {
-    if (m.front().size() != v.size()) {
-        throw std::runtime_error("Cannot multiply matrix and vector: Incompatible sizes");
-    }
-    std::vector<double> result(m.size(), 0.0);
-    for (size_t i = 0; i < m.size(); i++) {
-        for (size_t j = 0; j < m[i].size(); j++) {
-            result[i] += m[i][j] * v[j];
-        }
-    }
-    return result;
-}
-
-std::vector<double> Matrix::multiplyVector(double scalar, const std::vector<double>& v) const {
-    std::vector<double> result(v.size());
-    for (size_t i = 0; i < v.size(); i++) {
-        result[i] = scalar * v[i];
-    }
-    return result;
-}
-
-std::vector<double> Matrix::addVectors(const std::vector<double>& a, const std::vector<double>& b) const {
-    if (a.size() != b.size()) {
-        throw std::runtime_error("Cannot add vectors: Incompatible sizes");
-    }
-    std::vector<double> result(a.size());
-    for (size_t i = 0; i < a.size(); i++) {
-        result[i] = a[i] + b[i];
-    }
-    return result;
-}
-
-double Matrix::dotProduct(const std::vector<double>& a, const std::vector<double>& b) const {
-    if (a.size() != b.size()) {
-        throw std::runtime_error("Cannot compute dot product: Incompatible sizes");
-    }
-    double sum = 0.0;
-    for (size_t i = 0; i < a.size(); i++) {
-        sum += a[i] * b[i];
-    }
-    return sum;
-}
-
-double Matrix::norm(const std::vector<double>& v) const {
-    return std::sqrt(dotProduct(v, v));
-}
-#ifndef PORTFOLIO_H
-#define PORTFOLIO_H
-
-#include "Matrix.h"
-#include <vector>
-
-class Portfolio {
-private:
-    const Matrix& assetReturns;
-    int assetReturnsIndexes[2];
-    std::vector<double> meanReturns;
-    Matrix covarianceMatrix;
-
-public:
-    Portfolio(const Matrix& assetReturns);
-
-    void addAssetReturnsIndex(int start, int end);
-    void calculateMeanReturns();
-    void calculateCovarianceMatrix();
-
-    std::vector<double> getMeanReturns();
-    Matrix getCovarianceMatrix();
-};
-
-#endif // PORTFOLIO_H#ifndef WINDOW_H
-#define WINDOW_H
-
-class Window {
-private:
-    int inSampleSize;
-    int outSampleSize;
-
-public:
-    Window();
-    Window(int inSample, int outSample);
-
-    void setInSampleSize(int inSample);
-    void setOutSampleSize(int outSample);
-
-    int getInSampleSize() const;
-    int getOutSampleSize() const;
-};
-
-#endif // WINDOW_H#include "Headers/Portfolio.h"
-#include "Headers/Matrix.h"
-#include <iostream>
-
-Portfolio::Portfolio(const Matrix& assetReturns) : assetReturns(assetReturns) {}
-
-
-void Portfolio::addAssetReturnsIndex(int start, int end) {
-    assetReturnsIndexes[0] = start;
-    assetReturnsIndexes[1] = end;
-}
-
-void Portfolio::calculateMeanReturns() {
-    const Matrix& assetData = assetReturns;
-
-    int numAssets = assetData.front().size();
-    int numDays = assetData.size();
-
-    meanReturns.clear();
-    meanReturns.reserve(numAssets);
-
-    for (int i = 0; i < numAssets; ++i) {
-        double sum = 0.0;
-        for (int k = assetReturnsIndexes[0]; k < assetReturnsIndexes[1]; ++k) {
-            sum += assetData[k][i];
-        }
-        double meanReturn = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0]);
-        meanReturns.push_back(meanReturn);
-    }
-}
-
-void Portfolio::calculateCovarianceMatrix() {
-    const Matrix& assetData = assetReturns;
-
-    int numAssets = assetData[0].size();
-    int numDays = assetData.size();
-
-    covarianceMatrix.clear();
-    covarianceMatrix.resize(numAssets, std::vector<double>(numAssets));
-
-    for (int i = 0; i < numAssets; ++i) {
-        for (int j = 0; j <= i; ++j) {
-            double sum = 0.0;
-            for (int k = assetReturnsIndexes[0]; k < assetReturnsIndexes[1]; ++k) {
-                double diff_i = assetData[k][i] - meanReturns[i];
-                double diff_j = assetData[k][j] - meanReturns[j];
-                sum += diff_i * diff_j;
-            }
-            double cov = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0] - 1);
-            covarianceMatrix[i][j] = cov;
-            covarianceMatrix[j][i] = cov; // Covariance matrix is symmetric
-        }
-    }
-}std::vector<double> Portfolio::getMeanReturns() {
-    if (meanReturns.empty()) {
-        calculateMeanReturns();
-    }
-    return meanReturns
-    
-    ;
-}
-
-Matrix Portfolio::getCovarianceMatrix() {
-    if (covarianceMatrix.empty()) {
-        calculateCovarianceMatrix();
-    }
-    return covarianceMatrix;
-}#include "Headers/Window.h"
-
-Window::Window() : inSampleSize(0), outSampleSize(0) {}
-
-Window::Window(int inSample, int outSample) : inSampleSize(inSample), outSampleSize(outSample) {}
-
-void Window::setInSampleSize(int inSample) {
-    inSampleSize = inSample;
-}
-
-void Window::setOutSampleSize(int outSample) {
-    outSampleSize = outSample;
-}
-
-int Window::getInSampleSize() const {
-    return inSampleSize;
-}
-
-int Window::getOutSampleSize() const {
-    return outSampleSize;
-}#ifndef PORTFOLIOOPTIMISER_H
-#define PORTFOLIOOPTIMISER_H
-
-#include "Matrix.h"
-#include <vector>
-
-class PortfolioOptimiser {
-public:
-    virtual std::vector<double> getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) = 0;
-};
-
-#endif // PORTFOLIOOPTIMISER_H
-#ifndef CONJUGATEGRADIENTOPTIMISER_H
-#define CONJUGATEGRADIENTOPTIMISER_H
-
-#include "PortfolioOptimiser.h"
-#include "Matrix.h"
-#include <vector>
-
-class ConjugateGradientOptimiser : public PortfolioOptimiser {
-public:
-    std::vector<double> getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) override;
-};
-
-#endif // CONJUGATEGRADIENTOPTIMISER_H
-#include "Headers/ConjugateGradientOptimiser.h"
-
-std::vector<double> ConjugateGradientOptimiser::getWeights(const Matrix& covMatrix, const std::vector<double>& meanReturns, double targetReturn) {
-    const double tolerance = 1e-6;  // set the tolerance ε to 10e-6
-
-    // Form the system of linear equations Qx = b from the optimization problem
-    Matrix Q = covMatrix;  // Initialize Q with the covariance matrix
-    Q.appendRow(meanReturns);  // Append the mean returns to Q
-    Q.appendRow(std::vector<double>(covMatrix.size(), 1));  // Append the constraint that the sum of weights equals 1
-
-    std::vector<double> x(covMatrix.size() + 2, 0);  // x is the vector of weights and Lagrange multipliers
-
-    std::vector<double> b(covMatrix.size(), targetReturn);  // Initialize b with the target return
-    b.push_back(0);  // Append zero for the constraint on the mean returns
-    b.push_back(1);  // Append one for the constraint that the sum of weights equals 1
-
-    // Step 0: Initialize s0, p0
-    std::vector<double> s = Q.subtractVectors(b, Q.multiplyMatrixVector(Q, x));  // s0 = b - Q * x0
-    std::vector<double> p = s;  // p0 = s0
-
-    // Step 1: Run the loop until the norm of sk is less than or equal to the tolerance
-    for (size_t k = 0; Q.norm(s) > tolerance; k++) {
-        double alpha = Q.dotProduct(s, s) / Q.dotProduct(p, Q.multiplyMatrixVector(Q, p));  // αk = s⊤k sk / p⊤k Qpk
-
-        x = Q.addVectors(x, Q.multiplyVector(alpha, p));  // xk+1 = xk + αk * pk
-        std::vector<double> old_s = s;
-        s = Q.subtractVectors(s, Q.multiplyVector(alpha, Q.multiplyMatrixVector(Q, p)));  // sk+1 = sk - αk * Qpk
-
-        double beta = Q.dotProduct(s, s) / Q.dotProduct(old_s, old_s);  // βk = s⊤k+1sk+1 / s⊤k sk
-        p = Q.addVectors(s, Q.multiplyVector(beta, p));  // pk+1 = sk+1 + βk * pk
-    }
-
-    return x;
-}
+Number of assets: 83
+Processing in-sample rolling window: 0
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 1
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 2
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 3
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 4
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 5
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 6
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 7
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 8
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 9
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 10
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 11
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 12
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 13
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 14
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 15
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 16
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 17
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 18
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 19
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 20
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 21
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 22
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 23
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 24
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 25
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 26
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 27
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 28
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 29
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 30
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 31
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 32
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 33
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 34
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 35
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 36
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 37
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 38
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 39
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 40
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 41
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 42
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 43
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 44
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 45
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 46
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 47
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 48
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Processing in-sample rolling window: 49
+Error: alpha is infinity or NaN
+Portfolio weights: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Success

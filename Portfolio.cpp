@@ -39,19 +39,22 @@ void Portfolio::calculateCovarianceMatrix() {
     covarianceMatrix.resize(numAssets, std::vector<double>(numAssets));
 
     for (int i = 0; i < numAssets; ++i) {
-        for (int j = 0; j <= i; ++j) {
+        for (int j = 0; j < numAssets; ++j) {
             double sum = 0.0;
             for (int k = assetReturnsIndexes[0]; k < assetReturnsIndexes[1]; ++k) {
                 double diff_i = assetData[k][i] - meanReturns[i];
                 double diff_j = assetData[k][j] - meanReturns[j];
                 sum += diff_i * diff_j;
             }
-            double cov = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0] - 1);
+            double cov = sum / (assetReturnsIndexes[1] - assetReturnsIndexes[0]);
             covarianceMatrix[i][j] = cov;
             covarianceMatrix[j][i] = cov; // Covariance matrix is symmetric
         }
     }
-}std::vector<double> Portfolio::getMeanReturns() {
+}
+
+
+std::vector<double> Portfolio::getMeanReturns() {
     if (meanReturns.empty()) {
         calculateMeanReturns();
     }

@@ -18,7 +18,7 @@ int main() {
     }
 
     // Create an object of Window
-    Window window(100, 10);
+    Window window(100, 12);
 
     // Create an array of Portfolios
     std::vector<Portfolio> portfolios;
@@ -28,6 +28,8 @@ int main() {
     std::cout << "Number of assets: " << numAssets << std::endl;
 
     int count = 0;
+    ConjugateGradientOptimiser optimiser;
+     double targetReturn = 0.05;
     for (int currentIndex = 0; currentIndex + window.getInSampleSize() < assetReturns.size(); currentIndex += window.getOutSampleSize()) {
 
         std::cout << "Processing in-sample rolling window: " << count++ << std::endl;
@@ -38,21 +40,18 @@ int main() {
         portfolio.calculateMeanReturns();
         portfolio.calculateCovarianceMatrix();
 
-        portfolios.push_back(portfolio);
-    }
-
-    ConjugateGradientOptimiser optimiser;
-    double targetReturn = 0.01;  // Set a target return
-    for (Portfolio& portfolio : portfolios) {
         std::vector<double> weights = optimiser.getWeights(portfolio.getCovarianceMatrix(), portfolio.getMeanReturns(), targetReturn);
-        
         // Print weights for each portfolio
         std::cout << "Portfolio weights: ";
         for (double weight : weights) {
             std::cout << weight << " ";
         }
         std::cout << std::endl;
+        portfolios.push_back(portfolio);
     }
+
+
+     // Set the target return to 0.05
 
     std::cout << "Success" << std::endl;
 
